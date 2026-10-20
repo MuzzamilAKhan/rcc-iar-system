@@ -41,4 +41,8 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function 
         return view('admin.local-ra');
     })->name('admin.local-ra');
 
+    Route::get('/admin/import-issues', function () {
+        return view('admin.import-issues');
+    })->name('admin.import-issues');
+
 });

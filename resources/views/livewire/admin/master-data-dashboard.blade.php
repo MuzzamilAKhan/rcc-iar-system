@@ -54,6 +54,12 @@
                             Browse Local RA →
                         </a>
                     @endif
+                    @if ($title === 'Import Issues')
+                        <a href="{{ route('admin.import-issues') }}"
+                            class="inline-block mt-4 text-blue-700 font-semibold hover:underline">
+                            Review Issues →
+                        </a>
+                    @endif
                 </div>
 
             @endforeach
@@ -69,7 +75,7 @@
                 <table class="w-full text-left">
                     <thead class="border-b bg-slate-50">
                         <tr>
-                                <th class="p-3">Source</th>
+                            <th class="p-3">Source</th>
                             <th class="p-3">Issue</th>
                             <th class="p-3">Count</th>
                         </tr>
@@ -80,7 +86,8 @@
                             <tr class="border-b">
                                 <td class="p-3">
                                     {{ $issue->source_file }}
-                                    </td> <td class="p-3">
+                                </td>
+                                <td class="p-3">
                                     {{ $issue->issue_code }}
                                 </td>
 
