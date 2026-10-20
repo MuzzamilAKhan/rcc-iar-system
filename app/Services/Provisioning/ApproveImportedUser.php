@@ -34,10 +34,15 @@ class ApproveImportedUser
             }
 
             // Only users imported through the master-data process.
+
             $isImported = DB::table('master_import_rows')
                 ->whereIn('record_kind', ['global_ra', 'local_ra'])
-                ->where('source_data', 'like', '%' . addcslashes($user->email, '%_\\') . '%')
+                ->whereRaw(
+                    'LOWER(json_extract(source_data, ?)) = ?',
+                    ['$.Email', strtolower(trim($user->email))]
+                )
                 ->exists();
+
 
             if (!$isImported) {
                 throw ValidationException::withMessages([
