@@ -35,4 +35,10 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function 
     Route::get('/admin/global-ra', function () {
         return view('admin.global-ra');
     })->name('admin.global-ra');
+
+
+    Route::get('/admin/local-ra', function () {
+        return view('admin.local-ra');
+    })->name('admin.local-ra');
+
 });

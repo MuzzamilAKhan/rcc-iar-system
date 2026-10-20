@@ -48,6 +48,12 @@
                             Browse Global RA →
                         </a>
                     @endif
+                    @if ($title === 'Local RA Contacts')
+                        <a href="{{ route('admin.local-ra') }}"
+                            class="inline-block mt-4 text-blue-700 font-semibold hover:underline">
+                            Browse Local RA →
+                        </a>
+                    @endif
                 </div>
 
             @endforeach
@@ -63,7 +69,7 @@
                 <table class="w-full text-left">
                     <thead class="border-b bg-slate-50">
                         <tr>
-                            <th class="p-3">Source</th>
+                                <th class="p-3">Source</th>
                             <th class="p-3">Issue</th>
                             <th class="p-3">Count</th>
                         </tr>
@@ -74,9 +80,7 @@
                             <tr class="border-b">
                                 <td class="p-3">
                                     {{ $issue->source_file }}
-                                </td>
-
-                                <td class="p-3">
+                                    </td> <td class="p-3">
                                     {{ $issue->issue_code }}
                                 </td>
 
