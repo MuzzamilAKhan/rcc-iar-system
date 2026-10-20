@@ -23,7 +23,12 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function 
         return view('admin.products');
     })->name('admin.products');
 
-    Route::get('/admin/products', function () {
-        return view('admin.products');
-    })->name('admin.products');
+    Route::get('/admin/products/{product}', function (\App\Models\Product $product) {
+        $product->load([
+            'businessUnit',
+            'registrations.country',
+        ]);
+
+        return view('admin.product-details', compact('product'));
+    })->name('admin.products.show');
 });

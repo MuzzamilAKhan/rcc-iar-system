@@ -48,7 +48,10 @@
                             <tr wire:key="product-{{ $product->id }}" class="border-b hover:bg-slate-50">
 
                                 <td class="p-3 font-medium">
-                                    {{ $product->sap_code }}
+                                    <a href="{{ route('admin.products.show', $product) }}"
+                                        class="text-blue-700 hover:underline">
+                                        {{ $product->sap_code }}
+                                    </a>
                                 </td>
 
                                 <td class="p-3">
