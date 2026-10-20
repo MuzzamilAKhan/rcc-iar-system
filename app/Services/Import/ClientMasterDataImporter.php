@@ -39,7 +39,10 @@ final class ClientMasterDataImporter
             $headers = fgetcsv($stream);
             if ($headers === false)
                 throw new RuntimeException("Empty CSV: {$path}");
-            $headers = array_map(fn($s) => trim((string) $s, "\xEF\xBB\xBF \t\r\n"), $headers);
+            $headers = array_map(fn($s) => $this->normalizeHeader((string) $s), $headers);
+            if (in_array('', $headers, true) || count($headers) !== count(array_unique($headers))) {
+                throw new RuntimeException("Invalid or duplicate normalized CSV headers: {$path}");
+            }
             $rowNumber = 1;
             while (($values = fgetcsv($stream)) !== false) {
                 $rowNumber++;
@@ -52,6 +55,23 @@ final class ClientMasterDataImporter
         } finally {
             fclose($stream);
         }
+    }
+
+    private function normalizeHeader(string $header): string
+    {
+        // Client CSVs include literal quotes in some header names (e.g. '"BU"').
+        $header = preg_replace('/^\xEF\xBB\xBF/', '', $header);
+        return trim(trim($header), " \t\n\r\0\x0B\"'");
+    }
+
+    private function clearIssue(string $source, int $row, string $code): void
+    {
+        // Only remove previously recorded errors once this exact issue is resolved.
+        DB::table('master_import_issues')
+            ->where('source_file', $source)
+            ->where('source_row', $row)
+            ->where('issue_code', $code)
+            ->delete();
     }
 
     private function issue(string $source, int $row, string $code, string $message, array $data): void
@@ -81,18 +101,32 @@ final class ClientMasterDataImporter
         );
     }
 
+
     private function account(string $name, string $email, ?string $position = null): User
     {
-        // Never enable external contacts or grant them a known/static password.
-        $user = User::firstOrCreate(['email' => strtolower(trim($email))], [
-            'name' => $name,
-            'position' => $position,
-            'password' => Hash::make(Str::random(72)),
-            'is_active' => false,
-        ]);
-        // Existing user state/password/roles are not overwritten by import.
+        $email = strtolower(trim($email));
+
+        $user = User::firstOrCreate(
+            ['email' => $email],
+            [
+                'name' => $name,
+                'position' => $position,
+                'password' => Hash::make(Str::random(72)),
+                'is_active' => false,
+            ]
+        );
+
+        // Only newly created imported accounts must be inactive.
+        // Existing authorized accounts must not be modified.
+        if ($user->wasRecentlyCreated && $user->is_active) {
+            throw new \RuntimeException(
+                'Imported contact was unexpectedly activated.'
+            );
+        }
+
         return $user;
     }
+
 
     private function importGlobal(string $file): int
     {
@@ -112,6 +146,7 @@ final class ClientMasterDataImporter
                     $this->issue('global_ra.csv', $num, 'missing_bu', 'Business unit is missing.', $row);
                     return;
                 }
+                $this->clearIssue('global_ra.csv', $num, 'missing_bu');
                 $bu = BusinessUnit::firstOrCreate(['code' => $code], ['name' => $code]);
                 if ($user->business_unit_id === null)
                     $user->update(['business_unit_id' => $bu->id]);
@@ -147,6 +182,7 @@ final class ClientMasterDataImporter
             $this->issue($source, $num, 'unmapped_country', "No approved ISO mapping for: {$name}", $row);
             return null;
         }
+        $this->clearIssue($source, $num, 'unmapped_country');
         $canonical = $this->canonicalRegion($name, $rawRegion);
         $region = Region::firstOrCreate(['code' => $canonical], [
             'name' => $canonical,

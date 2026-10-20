@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductRegistration extends Model
 {
-    protected $fillable = ['product_id','country_id','registration_number','registration_status','initial_registration_date','certificate_issue_date','certificate_expiry_date','commercial_status','market_authorization_holder','legal_manufacturer','physical_manufacturer','importer','specification_developer','device_classification','fda_510k_number_or_exempt','fda_product_code','doc_number','doc_approval_date','ce_certificate_number','ce_certificate_issue_date','source_registration_status','source_commercial_status','product_registration_type','product_description_in_market','source_metadata'];
+    protected $fillable = ['product_id', 'country_id', 'registration_number', 'registration_status', 'initial_registration_date', 'certificate_issue_date', 'certificate_expiry_date', 'commercial_status', 'market_authorization_holder', 'legal_manufacturer', 'physical_manufacturer', 'importer', 'specification_developer', 'device_classification', 'fda_510k_number_or_exempt', 'fda_product_code', 'doc_number', 'doc_approval_date', 'ce_certificate_number', 'ce_certificate_issue_date', 'source_registration_status', 'source_commercial_status', 'product_registration_type', 'product_description_in_market', 'source_metadata'];
 
     protected function casts(): array
     {
