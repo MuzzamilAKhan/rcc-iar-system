@@ -46,3 +46,9 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function 
     })->name('admin.import-issues');
 
 });
+
+
+Route::middleware(['auth', 'active', 'role:super-admin'])->get('/admin/users', function () {
+    return view('admin.users');
+})->name('admin.users');
+

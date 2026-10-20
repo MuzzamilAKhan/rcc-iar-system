@@ -65,6 +65,15 @@
             @endforeach
         </div>
 
+        @role('super-admin')
+        <div class="mt-6">
+            <a href="{{ route('admin.users') }}" class="inline-block bg-blue-700 text-white
+                  rounded-lg px-5 py-3 font-semibold">
+                Manage User Provisioning →
+            </a>
+        </div>
+        @endrole
+
         <div class="bg-white shadow-sm rounded-xl mt-8 p-6">
 
             <h2 class="text-xl font-bold mb-5">

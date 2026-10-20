@@ -26,6 +26,11 @@ class User extends Authenticatable
         'position',
         'business_unit_id',
         'is_active',
+        'provisioning_status',
+        'approved_by',
+        'approved_at',
+        'invited_at',
+        'activated_at',
     ];
 
     /**
@@ -49,6 +54,9 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'approved_at' => 'datetime',
+            'invited_at' => 'datetime',
+            'activated_at' => 'datetime',
         ];
     }
 
