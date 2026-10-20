@@ -72,4 +72,23 @@ class User extends Authenticatable
             ->withTimestamps();
     }
 
+
+    public function importedSourceRows(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(
+            MasterImportRow::class,
+            'imported_user_sources',
+            'user_id',
+            'master_import_row_id'
+        )
+            ->withPivot([
+                'source_email',
+                'verification_status',
+                'verified_by',
+                'verified_at',
+            ])
+            ->withTimestamps();
+    }
+
+
 }
