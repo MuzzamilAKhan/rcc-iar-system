@@ -37,6 +37,67 @@
                 </select>
             </div>
 
+
+            @if (session()->has('success'))
+                <div class="mb-5 rounded-lg bg-green-50 p-4 text-green-800">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if ($selectedUserId !== null)
+                <div class="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-5">
+                    <h2 class="text-lg font-bold">
+                        Confirm Account Approval
+                    </h2>
+
+                    <p class="mt-2 text-sm text-slate-700">
+                        You are approving this contact for a future secure
+                        invitation. This action will not activate login access
+                        or send an email.
+                    </p>
+
+                    <label class="mt-4 block text-sm font-semibold">
+                        Approval Reason
+                    </label>
+
+                    <textarea wire:model="approvalReason" rows="3" maxlength="1000"
+                        class="mt-2 w-full rounded-lg border border-slate-300 p-3"
+                        placeholder="Explain how the identity and role were verified..."></textarea>
+
+                    @error('approvalReason')
+                        <p class="mt-2 text-sm text-red-700">
+                            {{ $message }}
+                        </p>
+                    @enderror
+
+                    @error('selectedUserId')
+                        <p class="mt-2 text-sm text-red-700">
+                            {{ $message }}
+                        </p>
+                    @enderror
+
+                    @error('user')
+                        <p class="mt-2 text-sm text-red-700">
+                            {{ $message }}
+                        </p>
+                    @enderror
+
+                    <div class="mt-4 flex gap-3">
+                        <button type="button" wire:click="approveSelected" wire:loading.attr="disabled"
+                            wire:target="approveSelected"
+                            class="rounded-lg bg-blue-700 px-5 py-2 text-white disabled:opacity-50">
+                            Confirm Approval
+                        </button>
+
+                        <button type="button" wire:click="cancelApproval"
+                            class="rounded-lg border border-slate-300 bg-white px-5 py-2">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            @endif
+
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-slate-50 border-b">
@@ -46,6 +107,7 @@
                             <th class="p-3">Roles</th>
                             <th class="p-3">Provisioning</th>
                             <th class="p-3">Login</th>
+                            <th class="p-3">Action</th>
                         </tr>
                     </thead>
 
@@ -71,6 +133,24 @@
                                         <span class="text-amber-700">Disabled</span>
                                     @endif
                                 </td>
+
+                                <td class="p-3">
+                                    @if (
+                                            !$user->is_active &&
+                                            $user->provisioning_status === 'pending_review' &&
+                                            $user->hasAnyRole(['global-ra', 'local-ra'])
+                                        )
+                                        <button type="button" wire:click="selectForApproval({{ $user->id }})"
+                                            class="text-blue-700 font-semibold hover:underline">
+                                            Review
+                                        </button>
+                                    @else
+                                        <span class="text-slate-400">
+                                            —
+                                        </span>
+                                    @endif
+                                </td>
+
                             </tr>
                         @empty
                             <tr>

@@ -8,8 +8,15 @@ use Illuminate\Validation\ValidationException;
 
 class ApproveImportedUser
 {
-    public function approve(User $actor, int $targetUserId): void
+    public function approve(User $actor, int $targetUserId, string $reason = 'Approved for secure invitation'): void
     {
+        $reason = trim($reason);
+
+        if (mb_strlen($reason) < 10 || mb_strlen($reason) > 1000) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'reason' => 'Approval reason must be 10 to 1000 characters.',
+            ]);
+        }
         if (
             !$actor->is_active ||
             !$actor->hasRole('super-admin')
@@ -17,7 +24,7 @@ class ApproveImportedUser
             abort(403);
         }
 
-        DB::transaction(function () use ($actor, $targetUserId) {
+        DB::transaction(function () use ($actor, $targetUserId, $reason) {
             $user = User::query()
                 ->lockForUpdate()
                 ->findOrFail($targetUserId);
@@ -64,7 +71,7 @@ class ApproveImportedUser
                 'from_status' => $previous,
                 'to_status' => 'approved',
                 'action' => 'approved',
-                'reason' => 'Approved for secure invitation',
+                'reason' => $reason,
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
