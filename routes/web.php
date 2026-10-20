@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Livewire\Admin\MasterDataDashboard;
+use App\Livewire\Admin\ProductsIndex;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,4 +19,7 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function 
         return view('admin.master-data');
     })->name('admin.master-data');
 
+    Route::get('/admin/products', function () {
+        return view('admin.products');
+    })->name('admin.products');
 });
