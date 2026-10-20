@@ -22,4 +22,8 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function 
     Route::get('/admin/products', function () {
         return view('admin.products');
     })->name('admin.products');
+
+    Route::get('/admin/products', function () {
+        return view('admin.products');
+    })->name('admin.products');
 });

@@ -1,0 +1,86 @@
+<div class="min-h-screen bg-slate-100 p-6">
+    <div class="max-w-7xl mx-auto">
+
+        <a href="{{ route('admin.master-data') }}" class="text-blue-700">
+            &larr; Back to Master Data
+        </a>
+
+        <div class="mt-6 mb-8">
+            <h1 class="text-3xl font-bold">Product Registry</h1>
+            <p class="text-slate-500 mt-2">
+                Regulatory product master records
+            </p>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm p-6">
+
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+
+                <input type="search" wire:model.live.debounce.400ms="search"
+                    placeholder="Search SAP code, product or brand..."
+                    class="w-full border border-slate-300 rounded-lg px-4 py-3">
+
+                <select wire:model.live="businessUnit" class="w-full border border-slate-300 rounded-lg px-4 py-3">
+                    <option value="">All Business Units</option>
+
+                    @foreach ($businessUnits as $unit)
+                        <option value="{{ $unit->id }}">
+                            {{ $unit->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left">
+                    <thead class="bg-slate-50 border-b">
+                        <tr>
+                            <th class="p-3">SAP Code</th>
+                            <th class="p-3">Product Name</th>
+                            <th class="p-3">Brand</th>
+                            <th class="p-3">Business Unit</th>
+                            <th class="p-3">Registrations</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @forelse ($products as $product)
+                            <tr wire:key="product-{{ $product->id }}" class="border-b hover:bg-slate-50">
+
+                                <td class="p-3 font-medium">
+                                    {{ $product->sap_code }}
+                                </td>
+
+                                <td class="p-3">
+                                    {{ $product->product_name }}
+                                </td>
+
+                                <td class="p-3">
+                                    {{ $product->brand ?? 'N/A' }}
+                                </td>
+
+                                <td class="p-3">
+                                    {{ $product->businessUnit?->name ?? 'N/A' }}
+                                </td>
+
+                                <td class="p-3">
+                                    {{ $product->registrations_count }}
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="p-8 text-center text-slate-500">
+                                    No products found.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6">
+                {{ $products->links() }}
+            </div>
+        </div>
+    </div>
+</div>

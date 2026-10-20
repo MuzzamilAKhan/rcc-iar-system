@@ -16,8 +16,8 @@
             </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
             @foreach ([
                     'Products' => $stats['products'],
                     'Registrations' => $stats['registrations'],
@@ -35,6 +35,13 @@
                     <h2 class="text-3xl font-bold mt-3">
                         {{ number_format($count) }}
                     </h2>
+
+                    @if ($title === 'Products')
+                        <a href="{{ route('admin.products') }}"
+                            class="inline-block mt-4 text-blue-700 font-semibold hover:underline">
+                            Browse Products →
+                        </a>
+                    @endif
                 </div>
 
             @endforeach
