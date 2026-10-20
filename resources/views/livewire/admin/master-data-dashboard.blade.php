@@ -42,6 +42,12 @@
                             Browse Products →
                         </a>
                     @endif
+                    @if ($title === 'Global RA Contacts')
+                        <a href="{{ route('admin.global-ra') }}"
+                            class="inline-block mt-4 text-blue-700 font-semibold hover:underline">
+                            Browse Global RA →
+                        </a>
+                    @endif
                 </div>
 
             @endforeach

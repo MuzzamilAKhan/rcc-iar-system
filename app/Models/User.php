@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -50,4 +51,17 @@ class User extends Authenticatable
             'is_active' => 'boolean',
         ];
     }
+
+
+    public function businessUnits(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            \App\Models\BusinessUnit::class,
+            'user_business_units',
+            'user_id',
+            'business_unit_id'
+        )->withPivot('product_process_expertise')
+            ->withTimestamps();
+    }
+
 }

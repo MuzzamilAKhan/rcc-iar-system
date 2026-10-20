@@ -31,4 +31,8 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function 
 
         return view('admin.product-details', compact('product'));
     })->name('admin.products.show');
+
+    Route::get('/admin/global-ra', function () {
+        return view('admin.global-ra');
+    })->name('admin.global-ra');
 });
