@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Livewire\Admin\MasterDataDashboard;
-use App\Livewire\Admin\ProductsIndex;
+use App\Models\ImpactAssessment;
 
 Route::get('/', function () {
     return view('welcome');
@@ -14,41 +13,39 @@ Route::middleware(['auth', 'active'])
     })
     ->name('dashboard');
 
+Route::middleware(['auth', 'active', 'can:iar.create'])
+    ->get('/iars/create', fn() => view('iar.create'))
+    ->name('iar.create');
+
+Route::middleware(['auth', 'active'])
+    ->get('/iars/{impactAssessment}', function (ImpactAssessment $impactAssessment) {
+        $user = auth()->user();
+        abort_unless(
+            $impactAssessment->creator_id === $user->id
+            || $user->can('iar.view.all')
+            || ($user->can('iar.view.assigned') && $impactAssessment->assignments()
+                ->where('assigned_to_user_id', $user->id)->exists()),
+            403
+        );
+
+        $impactAssessment->load(['creator', 'products.product']);
+
+        return view('iar.show', compact('impactAssessment'));
+    })
+    ->name('iar.show');
+
 Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function () {
-    Route::get('/admin/master-data', function () {
-        return view('admin.master-data');
-    })->name('admin.master-data');
-
-    Route::get('/admin/products', function () {
-        return view('admin.products');
-    })->name('admin.products');
-
+    Route::get('/admin/master-data', fn() => view('admin.master-data'))->name('admin.master-data');
+    Route::get('/admin/products', fn() => view('admin.products'))->name('admin.products');
     Route::get('/admin/products/{product}', function (\App\Models\Product $product) {
-        $product->load([
-            'businessUnit',
-            'registrations.country',
-        ]);
-
+        $product->load(['businessUnit', 'registrations.country']);
         return view('admin.product-details', compact('product'));
     })->name('admin.products.show');
-
-    Route::get('/admin/global-ra', function () {
-        return view('admin.global-ra');
-    })->name('admin.global-ra');
-
-
-    Route::get('/admin/local-ra', function () {
-        return view('admin.local-ra');
-    })->name('admin.local-ra');
-
-    Route::get('/admin/import-issues', function () {
-        return view('admin.import-issues');
-    })->name('admin.import-issues');
-
+    Route::get('/admin/global-ra', fn() => view('admin.global-ra'))->name('admin.global-ra');
+    Route::get('/admin/local-ra', fn() => view('admin.local-ra'))->name('admin.local-ra');
+    Route::get('/admin/import-issues', fn() => view('admin.import-issues'))->name('admin.import-issues');
 });
 
-
-Route::middleware(['auth', 'active', 'role:super-admin'])->get('/admin/users', function () {
-    return view('admin.users');
-})->name('admin.users');
-
+Route::middleware(['auth', 'active', 'role:super-admin'])
+    ->get('/admin/users', fn() => view('admin.users'))
+    ->name('admin.users');

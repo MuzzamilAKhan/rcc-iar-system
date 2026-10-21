@@ -1,17 +1,35 @@
-RCC IAR - ClientMasterDataImporter header fix
+RCC-IAR Phase 5A — Local WAMP only
 
-1. Back up app/Services/Import/ClientMasterDataImporter.php in your Laravel project.
-2. Copy app/Services/Import/ClientMasterDataImporter.php from this ZIP into the matching path.
-3. From C:\wamp64\www\rcc-iar-system run:
-   php artisan optimize:clear
-   php artisan db:seed --class=ClientSampleDataSeeder
-   php artisan test
-4. Inspect master_import_issues after the import. Real missing emails, unknown markets,
-   and regulatory statuses are still recorded as issues.
+IMPORTANT: This is a new feature package, not a production deployment.
+Unzip into C:\wamp64\www\rcc-iar-system, preserving directories.
+Before unzipping, make sure Git working tree is clean or commit your own work.
 
-The patch normalizes CSV headers (including BOM, extra quote marks and whitespace),
-rejects duplicate normalized headers, and clears stale missing_bu/unmapped_country issues
-when an individual row is now successfully mapped. It does not reset tables or users.
+Includes:
+- app/Services/Iar/CreateIarDraft.php
+- app/Livewire/Iar/CreateDraft.php
+- resources/views/livewire/iar/create-draft.blade.php
+- resources/views/iar/create.blade.php
+- resources/views/iar/show.blade.php
+- resources/views/dashboard.blade.php (replaces dashboard for Create IAR link)
+- routes/web.php (replaces current routes preserving existing current entries)
+- tests/Feature/IarDraftCreationTest.php
 
-WARNING: A successful import does NOT mean that contact user accounts are approved
-for login or that country/regulatory mapping exceptions are resolved.
+No migrations, existing database tables reused.
+
+Run:
+  php -l app/Services/Iar/CreateIarDraft.php
+  php -l app/Livewire/Iar/CreateDraft.php
+  php artisan route:list --path=iars
+  php artisan test --filter=IarDraftCreationTest
+  php artisan test
+  npm run build
+
+Do NOT run migrate:fresh or publish to VPS yet.
+
+Notes:
+- A draft is not submitted, assigned, mailed or activated.
+- Maximum 30 selected products, one SAP code per IAR.
+- Dates interpreted in configured Laravel application timezone; confirm intended timezone.
+- IAR reference is IAR-YEAR-ID padded to 6 digits; IDs greater than 999999 will not match this exact test pattern.
+- Product search displays first 50 matches; selected items stay selected across searches.
+- Audit stores draft metadata, not the full version texts.
