@@ -46,7 +46,11 @@
 
             @if ($selectedUserId !== null)
                 <div class="mb-6 rounded-xl border border-amber-300 bg-amber-50 p-5">
-                    <h2 class="text-lg font-bold">Review Imported Account</h2>
+                    <div class="flex items-center justify-between gap-3">
+                        <h2 class="text-lg font-bold">Review Imported Account</h2>
+                        <button type="button" wire:click="cancelApproval"
+                            class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm">Close</button>
+                    </div>
                     @if ($reviewedUser)
                         <p class="mt-2 text-sm font-medium">{{ $reviewedUser->name }} — {{ $reviewedUser->email }}</p>
                     @endif
@@ -62,9 +66,10 @@
                                     <p class="text-slate-600">{{ $source->record_kind }} · {{ $source->source_email }}</p>
                                     <p
                                         class="{{ $source->verification_status === 'verified' ? 'text-green-700' : 'text-amber-700' }}">
-                                        {{ ucfirst($source->verification_status) }}</p>
+                                        {{ ucfirst($source->verification_status) }}
+                                    </p>
                                 </div>
-                                @if ($source->verification_status === 'pending')
+                                @if ($reviewedUser && !$reviewedUser->is_active && $reviewedUser->provisioning_status === 'pending_review' && $source->verification_status === 'pending')
                                     <button type="button" wire:click="selectForVerification({{ $source->id }})"
                                         class="rounded bg-slate-800 px-3 py-2 text-white">Verify source</button>
                                 @endif
@@ -75,7 +80,7 @@
                     </div>
                     @error('source')
                     <p class="mt-2 text-sm text-red-700">{{ $message }}</p> @enderror
-                    @if ($selectedSourceLinkId !== null)
+                    @if ($reviewedUser && $reviewedUser->provisioning_status === 'pending_review' && $selectedSourceLinkId !== null)
                         <div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 p-4">
                             <label for="verificationReason" class="block text-sm font-semibold">Source verification evidence /
                                 reason</label>
@@ -94,54 +99,107 @@
                             </div>
                         </div>
                     @endif
-                    <p class="mt-4 text-sm {{ $approvalReady ? 'text-green-700' : 'text-amber-800' }}">
-                        {{ $approvalReady ? 'All linked sources verified — approval can proceed.' : 'Approval blocked until every linked source is verified.' }}
-                    </p>
-
-                    <p class="mt-2 text-sm text-slate-700">
-                        You are approving this contact for a future secure
-                        invitation. This action will not activate login access
-                        or send an email.
-                    </p>
-
-                    <label class="mt-4 block text-sm font-semibold">
-                        Approval Reason
-                    </label>
-
-                    <textarea wire:model="approvalReason" rows="3" maxlength="1000"
-                        class="mt-2 w-full rounded-lg border border-slate-300 p-3"
-                        placeholder="Explain how the identity and role were verified..."></textarea>
-
-                    @error('approvalReason')
-                        <p class="mt-2 text-sm text-red-700">
-                            {{ $message }}
+                    @if ($reviewedUser && $reviewedUser->provisioning_status === 'pending_review')
+                        <p class="mt-4 text-sm {{ $approvalReady ? 'text-green-700' : 'text-amber-800' }}">
+                            {{ $approvalReady ? 'All linked sources verified — approval can proceed.' : 'Approval blocked until every linked source is verified.' }}
                         </p>
-                    @enderror
 
-                    @error('selectedUserId')
-                        <p class="mt-2 text-sm text-red-700">
-                            {{ $message }}
+                    @endif
+
+                    @if ($reviewedUser && !$reviewedUser->is_active && $reviewedUser->provisioning_status === 'pending_review')
+                        <p class="mt-2 text-sm text-slate-700">
+                            You are approving this contact for a future secure
+                            invitation. This action will not activate login access
+                            or send an email.
                         </p>
-                    @enderror
+                    @endif
 
-                    @error('user')
-                        <p class="mt-2 text-sm text-red-700">
-                            {{ $message }}
-                        </p>
-                    @enderror
+                    @if ($reviewedUser)
+                        <div class="mt-6 rounded-xl border border-slate-200 bg-white p-4">
+                            <h3 class="font-bold text-slate-900">
+                                Provisioning Audit History
+                            </h3>
 
-                    <div class="mt-4 flex gap-3">
-                        <button type="button" wire:click="approveSelected" wire:loading.attr="disabled"
-                            wire:target="approveSelected" @disabled(!$approvalReady)
-                            class="rounded-lg bg-blue-700 px-5 py-2 text-white disabled:opacity-50">
-                            Confirm Approval
-                        </button>
+                            <p class="mt-1 text-xs text-slate-500">
+                                Latest 50 recorded events for this contact.
+                            </p>
 
-                        <button type="button" wire:click="cancelApproval"
-                            class="rounded-lg border border-slate-300 bg-white px-5 py-2">
-                            Cancel
-                        </button>
-                    </div>
+                            @forelse ($auditHistory as $event)
+                                <div class="mt-4 border-t border-slate-200 pt-3">
+                                    <div class="flex flex-wrap justify-between gap-2">
+                                        <span class="font-semibold text-sm">
+                                            {{ ucwords(str_replace('_', ' ', $event->action)) }}
+                                        </span>
+
+                                        <span class="text-xs text-slate-500">
+                                            {{ $event->created_at }}
+                                        </span>
+                                    </div>
+
+                                    <p class="mt-1 text-xs text-slate-600">
+                                        By: {{ $event->actor_name }}
+                                    </p>
+
+                                    <p class="mt-1 text-xs text-slate-600">
+                                        {{ $event->from_status }}
+                                        &rarr;
+                                        {{ $event->to_status }}
+                                    </p>
+
+                                    @if ($event->reason)
+                                        <p class="mt-2 whitespace-pre-wrap break-words text-sm text-slate-700">
+                                            {{ $event->reason }}
+                                        </p>
+                                    @endif
+                                </div>
+                            @empty
+                                <p class="mt-3 text-sm text-slate-500">
+                                    No provisioning audit events recorded yet.
+                                </p>
+                            @endforelse
+                        </div>
+                    @endif
+
+                    @if ($reviewedUser && !$reviewedUser->is_active && $reviewedUser->provisioning_status === 'pending_review')
+                        <label class="mt-4 block text-sm font-semibold">
+                            Approval Reason
+                        </label>
+
+                        <textarea wire:model="approvalReason" rows="3" maxlength="1000"
+                            class="mt-2 w-full rounded-lg border border-slate-300 p-3"
+                            placeholder="Explain how the identity and role were verified..."></textarea>
+
+                        @error('approvalReason')
+                            <p class="mt-2 text-sm text-red-700">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        @error('selectedUserId')
+                            <p class="mt-2 text-sm text-red-700">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        @error('user')
+                            <p class="mt-2 text-sm text-red-700">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        <div class="mt-4 flex gap-3">
+                            <button type="button" wire:click="approveSelected" wire:loading.attr="disabled"
+                                wire:target="approveSelected" @disabled(!$approvalReady)
+                                class="rounded-lg bg-blue-700 px-5 py-2 text-white disabled:opacity-50">
+                                Confirm Approval
+                            </button>
+
+                            <button type="button" wire:click="cancelApproval"
+                                class="rounded-lg border border-slate-300 bg-white px-5 py-2">
+                                Cancel
+                            </button>
+                        </div>
+                    @endif
                 </div>
             @endif
 
@@ -154,6 +212,7 @@
                             <th class="p-3">Email</th>
                             <th class="p-3">Roles</th>
                             <th class="p-3">Provisioning</th>
+                            <th class="p-3">Verification</th>
                             <th class="p-3">Login</th>
                             <th class="p-3">Action</th>
                         </tr>
@@ -175,6 +234,27 @@
                                     {{ ucwords(str_replace('_', ' ', $user->provisioning_status)) }}
                                 </td>
                                 <td class="p-3">
+                                    @php
+                                        $progress = $progressByUser->get($user->id);
+                                        $total = (int) ($progress->total ?? 0);
+                                        $verified = (int) ($progress->verified ?? 0);
+                                    @endphp
+
+                                    <div class="font-semibold">
+                                        {{ $verified }}/{{ $total }}
+                                    </div>
+
+                                    @if ($user->provisioning_status === 'approved')
+                                        <span class="text-green-700 text-xs">Approved</span>
+                                    @elseif (!$user->is_active && $user->provisioning_status === 'pending_review' && $user->hasAnyRole(['global-ra', 'local-ra']) && $total > 0 && $verified === $total)
+                                        <span class="text-green-700 text-xs">Ready for Approval</span>
+                                    @elseif ($total > 0)
+                                        <span class="text-amber-700 text-xs">Verification Pending</span>
+                                    @else
+                                        <span class="text-slate-500 text-xs">No linked sources</span>
+                                    @endif
+                                </td>
+                                <td class="p-3">
                                     @if ($user->is_active)
                                         <span class="text-green-700">Enabled</span>
                                     @else
@@ -192,17 +272,20 @@
                                             class="text-blue-700 font-semibold hover:underline">
                                             Review
                                         </button>
+                                    @elseif ($user->provisioning_status === 'approved')
+                                        <button type="button" wire:click="viewHistory({{ $user->id }})"
+                                            class="text-blue-700 font-semibold hover:underline">
+                                            View History
+                                        </button>
                                     @else
-                                        <span class="text-slate-400">
-                                            ΓÇö
-                                        </span>
+                                        <span class="text-slate-400">—</span>
                                     @endif
                                 </td>
 
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6" class="p-8 text-center text-slate-500">
+                                <td colspan="7" class="p-8 text-center text-slate-500">
                                     No user accounts found.
                                 </td>
                             </tr>
@@ -217,5 +300,3 @@
         </div>
     </main>
 </div>
-
-C:\wamp64\www\rcc-iar-system>
