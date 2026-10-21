@@ -64,7 +64,6 @@ class UserProvisioningTest extends TestCase
 
         \Livewire\Livewire::actingAs($localRa)
             ->test(\App\Livewire\Admin\UserProvisioning::class)
-            ->call('selectForApproval', $target->id)
             ->assertForbidden();
 
         $this->assertSame(
@@ -153,5 +152,101 @@ class UserProvisioningTest extends TestCase
         ]);
     }
 
+
+    private function makePendingSourceFor(User $target): int
+    {
+        $rowId = \Illuminate\Support\Facades\DB::table('master_import_rows')->insertGetId([
+            'source_file' => 'local_ra.csv',
+            'source_row' => 10000 + $target->id,
+            'record_kind' => 'local_ra',
+            'source_fingerprint' => hash('sha256', 'source-verify-' . $target->id),
+            'source_data' => json_encode(['Email' => $target->email, 'Title' => 'Demo']),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        return \Illuminate\Support\Facades\DB::table('imported_user_sources')->insertGetId([
+            'user_id' => $target->id,
+            'master_import_row_id' => $rowId,
+            'source_email' => strtolower(trim($target->email)),
+            'verification_status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    public function test_super_admin_can_verify_source_with_reason_and_audit(): void
+    {
+        $admin = User::factory()->create(['is_active' => true]);
+        $admin->assignRole('super-admin');
+        $target = User::factory()->create(['is_active' => false, 'provisioning_status' => 'pending_review']);
+        $target->assignRole('local-ra');
+        $linkId = $this->makePendingSourceFor($target);
+
+        \Livewire\Livewire::actingAs($admin)
+            ->test(\App\Livewire\Admin\UserProvisioning::class)
+            ->call('selectForApproval', $target->id)
+            ->assertSee('local_ra.csv')
+            ->call('selectForVerification', $linkId)
+            ->set('verificationReason', 'Original source email and identity evidence reviewed.')
+            ->call('verifySelectedSource')
+            ->assertHasNoErrors()
+            ->assertSee('All linked sources verified');
+
+        $this->assertDatabaseHas('imported_user_sources', [
+            'id' => $linkId,
+            'verification_status' => 'verified',
+            'verified_by' => $admin->id,
+        ]);
+        $this->assertDatabaseHas('user_provisioning_events', [
+            'user_id' => $target->id,
+            'actor_id' => $admin->id,
+            'action' => 'source_verified',
+        ]);
+        $this->assertFalse($target->fresh()->is_active);
+    }
+
+    public function test_invalid_reason_and_cross_user_source_cannot_be_verified(): void
+    {
+        $admin = User::factory()->create(['is_active' => true]);
+        $admin->assignRole('super-admin');
+        $first = User::factory()->create(['is_active' => false, 'provisioning_status' => 'pending_review']);
+        $first->assignRole('local-ra');
+        $other = User::factory()->create(['is_active' => false, 'provisioning_status' => 'pending_review']);
+        $other->assignRole('local-ra');
+        $firstLink = $this->makePendingSourceFor($first);
+        $otherLink = $this->makePendingSourceFor($other);
+
+        \Livewire\Livewire::actingAs($admin)
+            ->test(\App\Livewire\Admin\UserProvisioning::class)
+            ->call('selectForApproval', $first->id)
+            ->call('selectForVerification', $firstLink)
+            ->set('verificationReason', 'short')
+            ->call('verifySelectedSource')
+            ->assertHasErrors(['verificationReason' => 'min']);
+
+        \Livewire\Livewire::actingAs($admin)
+            ->test(\App\Livewire\Admin\UserProvisioning::class)
+            ->set('selectedUserId', $first->id)
+            ->set('selectedSourceLinkId', $otherLink)
+            ->set('verificationReason', 'Cross account review should be rejected.')
+            ->call('verifySelectedSource')
+            ->assertHasErrors('source');
+
+        $this->assertDatabaseHas('imported_user_sources', ['id' => $firstLink, 'verification_status' => 'pending']);
+        $this->assertDatabaseHas('imported_user_sources', ['id' => $otherLink, 'verification_status' => 'pending']);
+    }
+
+    public function test_local_ra_cannot_verify_source(): void
+    {
+        $localRa = User::factory()->create(['is_active' => true]);
+        $localRa->assignRole('local-ra');
+        $target = User::factory()->create(['is_active' => false, 'provisioning_status' => 'pending_review']);
+        $target->assignRole('global-ra');
+        $linkId = $this->makePendingSourceFor($target);
+        \Livewire\Livewire::actingAs($localRa)
+            ->test(\App\Livewire\Admin\UserProvisioning::class)
+            ->assertForbidden();
+        $this->assertDatabaseHas('imported_user_sources', ['id' => $linkId, 'verification_status' => 'pending']);
+    }
 
 }
