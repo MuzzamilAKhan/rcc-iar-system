@@ -41,19 +41,32 @@ class ApproveImportedUser
             }
 
             // Only users imported through the master-data process.
+            $normalizedEmail = strtolower(trim($user->email));
 
-            $isImported = DB::table('master_import_rows')
-                ->whereIn('record_kind', ['global_ra', 'local_ra'])
-                ->whereRaw(
-                    'LOWER(json_extract(source_data, ?)) = ?',
-                    ['$.Email', strtolower(trim($user->email))]
+            $hasVerifiedSource = DB::table('imported_user_sources')
+                ->join(
+                    'master_import_rows',
+                    'master_import_rows.id',
+                    '=',
+                    'imported_user_sources.master_import_row_id'
                 )
+                ->where('imported_user_sources.user_id', $user->id)
+                ->where('imported_user_sources.verification_status', 'verified')
+                ->where('imported_user_sources.source_email', $normalizedEmail)
+                ->whereIn('master_import_rows.record_kind', [
+                    'global_ra',
+                    'local_ra',
+                ])
                 ->exists();
 
+            $hasUnverifiedSource = DB::table('imported_user_sources')
+                ->where('user_id', $user->id)
+                ->where('verification_status', '!=', 'verified')
+                ->exists();
 
-            if (!$isImported) {
+            if (!$hasVerifiedSource || $hasUnverifiedSource) {
                 throw ValidationException::withMessages([
-                    'user' => 'Imported identity could not be confirmed.',
+                    'user' => 'All linked import sources must be verified before approval.',
                 ]);
             }
 

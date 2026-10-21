@@ -103,6 +103,33 @@ class UserProvisioningTest extends TestCase
             'updated_at' => now(),
         ]);
 
+
+        $sourceId = \Illuminate\Support\Facades\DB::table(
+            'master_import_rows'
+        )
+            ->where('source_file', 'local_ra.csv')
+            ->where('source_row', 999)
+            ->value('id');
+
+        $linkId = \Illuminate\Support\Facades\DB::table(
+            'imported_user_sources'
+        )->insertGetId([
+                    'user_id' => $target->id,
+                    'master_import_row_id' => $sourceId,
+                    'source_email' => strtolower($target->email),
+                    'verification_status' => 'pending',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+        app(\App\Services\Provisioning\VerifyImportedUserSource::class)
+            ->verify(
+                $admin,
+                $linkId,
+                'Contact identity and regulatory role independently reviewed.'
+            );
+
+
         \Livewire\Livewire::actingAs($admin)
             ->test(\App\Livewire\Admin\UserProvisioning::class)
             ->call('selectForApproval', $target->id)

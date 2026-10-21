@@ -128,6 +128,78 @@ final class ClientMasterDataImporter
     }
 
 
+    private function linkImportedUser(
+        User $user,
+        string $source,
+        int $sourceRow
+    ): void {
+        if ($user->is_active) {
+            throw new RuntimeException(
+                'An active account cannot be automatically linked to an imported contact.'
+            );
+        }
+
+        $importRow = DB::table('master_import_rows')
+            ->where('source_file', $source)
+            ->where('source_row', $sourceRow)
+            ->first();
+
+        if (!$importRow) {
+            throw new RuntimeException(
+                "Import source row not found: {$source}:{$sourceRow}"
+            );
+        }
+
+        $data = json_decode(
+            $importRow->source_data,
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        $sourceEmail = strtolower(trim(
+            (string) ($data['Email'] ?? '')
+        ));
+
+        if (
+            !filter_var($sourceEmail, FILTER_VALIDATE_EMAIL) ||
+            $sourceEmail !== strtolower(trim($user->email))
+        ) {
+            throw new RuntimeException(
+                'Source email does not match the imported user.'
+            );
+        }
+
+        $existing = DB::table('imported_user_sources')
+            ->where('user_id', $user->id)
+            ->where('master_import_row_id', $importRow->id)
+            ->first();
+
+        if ($existing) {
+            if ($existing->source_email !== $sourceEmail) {
+                throw new RuntimeException(
+                    'Existing source linkage has a conflicting email.'
+                );
+            }
+
+            // Never overwrite manual verification.
+            return;
+        }
+
+        DB::table('imported_user_sources')->insertOrIgnore([
+            'user_id' => $user->id,
+            'master_import_row_id' => $importRow->id,
+            'source_email' => $sourceEmail,
+            'verification_status' => 'pending',
+            'verified_by' => null,
+            'verified_at' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+
+
     private function importGlobal(string $file): int
     {
         $count = 0;
@@ -140,6 +212,12 @@ final class ClientMasterDataImporter
                     return;
                 }
                 $user = $this->account($row['Full Name'] ?: $email, $email, $row['Position'] ?: null);
+
+                if ($user->is_active) {
+                    $this->issue('global_ra.csv', $num, 'existing_active_contact_requires_review', 'Imported email belongs to an existing active account.', $row);
+                    return;
+                }
+
                 $user->assignRole('global-ra');
                 $code = Str::upper(trim($row['BU'] ?? ''));
                 if ($code === '') {
@@ -157,6 +235,11 @@ final class ClientMasterDataImporter
                         'created_at' => now(),
                         'updated_at' => now()
                     ]
+                );
+                $this->linkImportedUser(
+                    $user,
+                    'global_ra.csv',
+                    $num
                 );
                 $count++;
             });
@@ -217,9 +300,23 @@ final class ClientMasterDataImporter
                     return;
                 }
                 $user = $this->account($row['CvT RA Contact'] ?: $email, $email);
+
+                if ($user->is_active) {
+                    $this->issue(
+                        'local_ra.csv',
+                        $num,
+                        'existing_active_contact_requires_review',
+                        'Imported email belongs to an existing active account.',
+                        $row
+                    );
+
+                    return;
+                }
+
                 $user->assignRole('local-ra');
                 $existing = CountryAssessor::where('country_id', $country->id)->orderBy('assignment_priority')->get();
                 if ($existing->contains('user_id', $user->id)) {
+                    $this->linkImportedUser($user, 'local_ra.csv', $num);
                     $count++;
                     return;
                 }
@@ -233,6 +330,11 @@ final class ClientMasterDataImporter
                     'assignment_priority' => $existing->count() + 1,
                     'is_active' => true,
                 ]);
+                $this->linkImportedUser(
+                    $user,
+                    'local_ra.csv',
+                    $num
+                );
                 $count++;
             });
         }

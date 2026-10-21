@@ -48,12 +48,41 @@ class ApproveImportedUserTest extends TestCase
         return $user;
     }
 
+    private function verifyImportedContact(
+        User $admin,
+        User $contact
+    ): void {
+        $sourceId = DB::table('master_import_rows')
+            ->where('source_file', 'local_ra.csv')
+            ->where('source_row', 2)
+            ->value('id');
+
+        $linkId = DB::table('imported_user_sources')
+            ->insertGetId([
+                'user_id' => $contact->id,
+                'master_import_row_id' => $sourceId,
+                'source_email' => strtolower($contact->email),
+                'verification_status' => 'pending',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+        app(\App\Services\Provisioning\VerifyImportedUserSource::class)
+            ->verify(
+                $admin,
+                $linkId,
+                'Contact identity and regulatory role independently reviewed.'
+            );
+    }
+
+
     public function test_super_admin_can_approve_imported_contact(): void
     {
         $admin = User::factory()->create(['is_active' => true]);
         $admin->assignRole('super-admin');
 
         $contact = $this->createImportedContact();
+        $this->verifyImportedContact($admin, $contact);
 
         app(ApproveImportedUser::class)->approve(
             $admin,
@@ -116,6 +145,7 @@ class ApproveImportedUserTest extends TestCase
         $admin->assignRole('super-admin');
 
         $contact = $this->createImportedContact();
+        $this->verifyImportedContact($admin, $contact);
 
         app(ApproveImportedUser::class)->approve(
             $admin,
