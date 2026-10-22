@@ -10,7 +10,11 @@
 
 <body class="min-h-screen bg-slate-100">
     <main class="mx-auto max-w-5xl p-6">
-        <a href="{{ route('dashboard') }}" class="text-blue-700">&larr; Dashboard</a>
+        <div class="flex flex-wrap gap-4"><a href="{{ route('dashboard') }}" class="text-blue-700">&larr; Dashboard</a>
+        <a href="{{ route('iar.index') }}" class="text-blue-700">View all IARs</a>
+        @if($impactAssessment->status === 'draft' && $impactAssessment->creator_id === auth()->id() && auth()->user()->can('iar.create'))
+            <a href="{{ route('iar.edit', $impactAssessment) }}" class="font-semibold text-blue-700">Edit Draft</a>
+        @endif</div>
         @if (session('success'))
         <div class="my-5 rounded bg-green-50 p-4 text-green-800">{{ session('success') }}</div> @endif
         <div class="mt-6 rounded-xl bg-white p-6 shadow-sm">
@@ -47,15 +51,15 @@
             </div>
             <div class="mt-5">
                 <h2 class="font-semibold">Impact Flags</h2>
-                <p>SAP / UDI / ICC: {{ $impactAssessment->sap_udi_icc_impacted ? 'Yes' : 'No' }} · Labelling:
-                    {{ $impactAssessment->labelling_impacted ? 'Yes' : 'No' }} · Urgent:
+                <p>SAP / UDI / ICC: {{ $impactAssessment->sap_udi_icc_impacted ? 'Yes' : 'No' }} ┬╖ Labelling:
+                    {{ $impactAssessment->labelling_impacted ? 'Yes' : 'No' }} ┬╖ Urgent:
                     {{ $impactAssessment->is_urgent ? 'Yes' : 'No' }}</p>
             </div>
             <div class="mt-5">
                 <h2 class="font-semibold">Affected Products</h2>
                 <ul class="mt-2 list-disc pl-5">
                     @foreach ($impactAssessment->products as $item)
-                        <li>{{ $item->submitted_sap_code }} — {{ $item->product?->product_name ?? 'Product unavailable' }}
+                        <li>{{ $item->submitted_sap_code }} ΓÇö {{ $item->product?->product_name ?? 'Product unavailable' }}
                         </li>
                     @endforeach
                 </ul>
