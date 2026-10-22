@@ -1,35 +1,23 @@
-RCC-IAR Phase 5A — Local WAMP only
+PHASE 5C.1 - READ-ONLY IAR SUBMISSION READINESS
 
-IMPORTANT: This is a new feature package, not a production deployment.
-Unzip into C:\wamp64\www\rcc-iar-system, preserving directories.
-Before unzipping, make sure Git working tree is clean or commit your own work.
+1. Extract ZIP anywhere (e.g. Downloads) -- NOT directly into the project.
+2. Open Windows CMD:
+   cd %USERPROFILE%\Downloads\phase5c1
+   py install_phase5c1.py
+   (Use python instead of py if necessary.)
+3. In Laravel project:
+   cd C:\wamp64\www\rcc-iar-system
+   php artisan route:list --path=iars
+   php artisan view:clear
+   php artisan test
+   npm run build
+4. In browser use /iars/<your-existing-ID>/readiness.
 
-Includes:
-- app/Services/Iar/CreateIarDraft.php
-- app/Livewire/Iar/CreateDraft.php
-- resources/views/livewire/iar/create-draft.blade.php
-- resources/views/iar/create.blade.php
-- resources/views/iar/show.blade.php
-- resources/views/dashboard.blade.php (replaces dashboard for Create IAR link)
-- routes/web.php (replaces current routes preserving existing current entries)
-- tests/Feature/IarDraftCreationTest.php
+The existing AssignmentReadinessService::summary() is a global report; it was not modified.
+This preview adds no migrations, writes no IAR data and sends no messages.
+Approval and account activation are independent; inactive contacts are BLOCKED.
+No submission action is exposed. 'Ready' means preview assessment only.
 
-No migrations, existing database tables reused.
-
-Run:
-  php -l app/Services/Iar/CreateIarDraft.php
-  php -l app/Livewire/Iar/CreateDraft.php
-  php artisan route:list --path=iars
-  php artisan test --filter=IarDraftCreationTest
-  php artisan test
-  npm run build
-
-Do NOT run migrate:fresh or publish to VPS yet.
-
-Notes:
-- A draft is not submitted, assigned, mailed or activated.
-- Maximum 30 selected products, one SAP code per IAR.
-- Dates interpreted in configured Laravel application timezone; confirm intended timezone.
-- IAR reference is IAR-YEAR-ID padded to 6 digits; IDs greater than 999999 will not match this exact test pattern.
-- Product search displays first 50 matches; selected items stay selected across searches.
-- Audit stores draft metadata, not the full version texts.
+LIMITATION: Registration status 'unknown' is blocked, but other source registration statuses
+are not automatically interpreted as regulatory authorization or non-authorization.
+Confirm acceptable registration status business rules before enabling Phase 5C.2.

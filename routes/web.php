@@ -52,3 +52,20 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function 
 Route::middleware(['auth', 'active', 'role:super-admin'])
     ->get('/admin/users', fn () => view('admin.users'))
     ->name('admin.users');
+
+// Phase 5C.1: read-only submission readiness preview.
+\Illuminate\Support\Facades\Route::middleware(['auth', 'active'])
+    ->get('/iars/{impactAssessment}/readiness', function (
+        \App\Models\ImpactAssessment $impactAssessment,
+        \App\Services\Iar\IarSubmissionReadiness $readiness
+    ) {
+        $user = auth()->user();
+        abort_unless(
+            $user->can('iar.view.all') ||
+            ($impactAssessment->creator_id === $user->id && $user->can('iar.view.own')),
+            403
+        );
+        $report = $readiness->inspect($impactAssessment);
+        return view('iar.readiness', compact('impactAssessment', 'report'));
+    })
+    ->name('iar.readiness');
