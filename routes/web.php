@@ -69,3 +69,10 @@ Route::middleware(['auth', 'active', 'role:super-admin'])
         return view('iar.readiness', compact('impactAssessment', 'report'));
     })
     ->name('iar.readiness');
+
+
+// Phase 5C.2 - POST-only submission. Readiness is rechecked server-side.
+\Illuminate\Support\Facades\Route::middleware(['auth', 'active', 'can:iar.create'])
+    ->post('/iars/{impactAssessment}/submit', \App\Http\Controllers\IarSubmitController::class)
+    ->name('iar.submit');
+

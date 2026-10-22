@@ -17,6 +17,7 @@ final class IarSubmissionReadiness
 
         $rows = collect();
         $registrationIssues = collect();
+        $unregisteredProductCount = 0;
 
         if ($productIds->isNotEmpty()) {
             $registrations = DB::table('product_registrations as r')
@@ -28,8 +29,11 @@ final class IarSubmissionReadiness
 
             $registrationIssues = $registrations->filter(fn ($r) =>
                 $r->country_id === null || $r->country_name === null ||
-                strtolower(trim((string) $r->registration_status)) === 'unknown'
+                in_array(strtolower(trim((string) $r->registration_status)), ['', 'unknown'], true)
             )->values();
+
+            $registeredProductIds = $registrations->pluck('product_id')->unique();
+            $unregisteredProductCount = $productIds->diff($registeredProductIds)->count();
 
             $countryIds = $registrations->pluck('country_id')->filter()->unique()->values();
 
@@ -59,6 +63,7 @@ final class IarSubmissionReadiness
                 $rows = $countries->map(function ($country) use ($primary, $localRaUsers, $iar) {
                     $blockers = [];
                     $assignee = null;
+                    $assigneeId = null;
                     $strategy = $country->assignment_strategy;
 
                     if (!$country->country_active || !$country->region_active) {
@@ -71,6 +76,7 @@ final class IarSubmissionReadiness
                             $blockers[] = 'IAR creator is not eligible for assignment.';
                         } else {
                             $assignee = $creator->name;
+                            $assigneeId = $creator->id;
                         }
                     } elseif ($strategy === 'country_assessor') {
                         $mapping = $primary->get($country->id);
@@ -78,6 +84,7 @@ final class IarSubmissionReadiness
                             $blockers[] = 'Primary country assessor mapping is missing.';
                         } else {
                             $assignee = $mapping->assessor_name;
+                            $assigneeId = (int) $mapping->user_id;
                             if (!$mapping->mapping_active) $blockers[] = 'Primary assessor mapping is inactive.';
                             if (!$mapping->user_active) $blockers[] = 'Primary assessor account is inactive.';
                             if (!in_array((int) $mapping->user_id, $localRaUsers, true)) $blockers[] = 'Primary assessor lacks Local RA role.';
@@ -94,6 +101,7 @@ final class IarSubmissionReadiness
                         'country' => $country->name,
                         'strategy' => $strategy,
                         'assignee' => $assignee,
+                        'assignee_id' => $assigneeId,
                         'ready' => count($blockers) === 0,
                         'blockers' => $blockers,
                     ];
@@ -105,6 +113,7 @@ final class IarSubmissionReadiness
         if ($iar->status !== 'draft') $globalBlockers[] = 'Only draft IARs can be submitted.';
         if ($productIds->isEmpty()) $globalBlockers[] = 'No affected products are linked.';
         if ($rows->isEmpty()) $globalBlockers[] = 'No registered countries were found for the selected products.';
+        if ($unregisteredProductCount > 0) $globalBlockers[] = 'One or more selected products have no country registration.';
         if ($registrationIssues->isNotEmpty()) $globalBlockers[] = 'One or more product registrations have unknown status or country.';
         if ($rows->contains(fn ($row) => !$row['ready'])) $globalBlockers[] = 'At least one country has an assignment blocker.';
 

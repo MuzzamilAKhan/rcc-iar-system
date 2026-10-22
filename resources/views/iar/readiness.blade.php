@@ -13,10 +13,10 @@
         <div class="flex flex-wrap items-start justify-between gap-4">
             <div>
                 <h1 class="text-2xl font-bold">Submission Readiness</h1>
-                <p class="mt-1 text-slate-600">{{ $report['iar_number'] }} &middot; Read-only preview</p>
+                <p class="mt-1 text-slate-600">{{ $report['iar_number'] }} &middot; Submission validation</p>
             </div>
             <span class="rounded px-3 py-1 text-sm {{ $report['can_submit'] ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
-                {{ $report['can_submit'] ? 'Ready (preview only)' : 'Blocked' }}
+                {{ $report['can_submit'] ? 'Ready to submit' : 'Blocked' }}
             </span>
         </div>
         <div class="mt-6 grid gap-4 sm:grid-cols-3">
@@ -52,7 +52,27 @@
                 </tbody>
             </table>
         </div>
-        <p class="mt-6 text-sm text-slate-500">This page never submits an IAR, creates assignments, activates contacts, or sends notifications. Submission will be developed separately in Phase 5C.2.</p>
+        @if ($errors->any())
+            <div class="mt-5 rounded border border-red-300 bg-red-50 p-4 text-red-800">
+                <strong>Submission not completed:</strong>
+                <ul class="mt-2 list-disc pl-5">@foreach ($errors->all() as $message)<li>{{ $message }}</li>@endforeach</ul>
+            </div>
+        @endif
+        @if ($impactAssessment->status === 'draft' && $impactAssessment->creator_id === auth()->id() && auth()->user()->can('iar.create'))
+            <form method="POST" action="{{ route('iar.submit', $impactAssessment) }}" class="mt-6">
+                @csrf
+                <button type="submit" @disabled(!$report['can_submit'])
+                    style="{{ $report['can_submit'] ? 'background-color:#047857;color:white;' : 'background-color:#cbd5e1;color:#475569;' }}"
+                    class="rounded-lg px-5 py-3 font-semibold disabled:cursor-not-allowed"
+                    onclick="return confirm('Submit this IAR and assign every listed country? This action cannot be undone here.');">
+                    Submit IAR &amp; Create Assignments
+                </button>
+                @unless($report['can_submit'])
+                    <p class="mt-2 text-sm text-amber-800">Resolve all submission blockers before submission.</p>
+                @endunless
+            </form>
+        @endif
+        <p class="mt-6 text-sm text-slate-500">Submission creates country assignments and locks draft editing. No emails, notifications or account activations are triggered.</p>
     </div>
 </main>
 </body>
