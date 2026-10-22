@@ -76,3 +76,11 @@ Route::middleware(['auth', 'active', 'role:super-admin'])
     ->post('/iars/{impactAssessment}/submit', \App\Http\Controllers\IarSubmitController::class)
     ->name('iar.submit');
 
+
+// Phase 5D.1 - assigned assessment workspace and draft save only.
+\Illuminate\Support\Facades\Route::middleware(['auth', 'active'])->group(function () {
+    \Illuminate\Support\Facades\Route::get('/assessments', [\App\Http\Controllers\AssessmentDraftController::class, 'index'])->name('assessment.index');
+    \Illuminate\Support\Facades\Route::get('/assessments/{assignment}/edit', [\App\Http\Controllers\AssessmentDraftController::class, 'edit'])->name('assessment.edit');
+    \Illuminate\Support\Facades\Route::post('/assessments/{assignment}/draft', [\App\Http\Controllers\AssessmentDraftController::class, 'save'])->name('assessment.save');
+});
+
