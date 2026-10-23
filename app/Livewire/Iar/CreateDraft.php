@@ -5,6 +5,7 @@ namespace App\Livewire\Iar;
 use App\Models\Product;
 use App\Services\Iar\CreateIarDraft;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class CreateDraft extends Component
 {
@@ -18,6 +19,8 @@ class CreateDraft extends Component
     public string $dueAt = '';
     public string $productSearch = '';
     public array $selectedProductIds = [];
+    use WithFileUploads;
+
     public string $bulkSapInput = '';
     public ?array $bulkSapReport = null;
 
@@ -28,6 +31,27 @@ class CreateDraft extends Component
         $this->authorizeCreator();
         $this->resetErrorBag('bulkSapInput');
         $this->bulkSapReport = $preview->inspect($this->bulkSapInput);
+    }
+
+    public $sapExcelFile = null;
+
+    public function importSapExcel(\App\Services\Iar\ReadIarSapSpreadsheet $reader, \App\Services\Iar\PreviewBulkSapCodes $preview): void
+    {
+        $this->authorizeCreator();
+        $this->resetErrorBag('sapExcelFile');
+        $this->validate([
+            'sapExcelFile' => ['required', 'file', 'max:4096'],
+        ]);
+        $extension = strtolower($this->sapExcelFile->getClientOriginalExtension());
+        if (!in_array($extension, ['xlsx', 'csv'], true)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'sapExcelFile' => 'Please select an .xlsx or .csv file.',
+            ]);
+        }
+        $codes = $reader->read($this->sapExcelFile->getRealPath(), $extension);
+        $this->bulkSapInput = implode("\n", $codes);
+        $this->bulkSapReport = $preview->inspect($this->bulkSapInput);
+        $this->reset('sapExcelFile');
     }
 
     private function authorizeCreator(): void

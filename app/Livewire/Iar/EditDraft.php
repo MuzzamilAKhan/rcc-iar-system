@@ -6,6 +6,7 @@ use App\Models\ImpactAssessment;
 use App\Models\Product;
 use App\Services\Iar\UpdateIarDraft;
 use Livewire\Component;
+use Livewire\WithFileUploads;
 
 class EditDraft extends Component
 {
@@ -20,6 +21,8 @@ class EditDraft extends Component
     public string $dueAt = '';
     public string $productSearch = '';
     public array $selectedProductIds = [];
+    use WithFileUploads;
+
     public string $bulkSapInput = '';
     public ?array $bulkSapReport = null;
 
@@ -57,6 +60,27 @@ class EditDraft extends Component
         $selectedProducts = Product::whereIn('id', $this->selectedProductIds)->get(['id', 'sap_code', 'product_name']);
 
         return view('livewire.iar.edit-draft', compact('iar', 'products', 'selectedProducts'));
+    }
+
+    public $sapExcelFile = null;
+
+    public function importSapExcel(\App\Services\Iar\ReadIarSapSpreadsheet $reader, \App\Services\Iar\PreviewBulkSapCodes $preview): void
+    {
+        $this->authorizeEdit(ImpactAssessment::findOrFail($this->iarId));
+        $this->resetErrorBag('sapExcelFile');
+        $this->validate([
+            'sapExcelFile' => ['required', 'file', 'max:4096'],
+        ]);
+        $extension = strtolower($this->sapExcelFile->getClientOriginalExtension());
+        if (!in_array($extension, ['xlsx', 'csv'], true)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'sapExcelFile' => 'Please select an .xlsx or .csv file.',
+            ]);
+        }
+        $codes = $reader->read($this->sapExcelFile->getRealPath(), $extension);
+        $this->bulkSapInput = implode("\n", $codes);
+        $this->bulkSapReport = $preview->inspect($this->bulkSapInput);
+        $this->reset('sapExcelFile');
     }
 
     public function previewBulkSap(\App\Services\Iar\PreviewBulkSapCodes $preview): void

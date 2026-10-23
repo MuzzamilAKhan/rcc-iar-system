@@ -18,6 +18,23 @@
         <section class="rounded border border-blue-200 bg-blue-50 p-4">
             <h3 class="font-semibold">Replace affected products using Excel SAP codes</h3>
             <p class="mt-1 text-sm text-slate-600">Optional: Paste one SAP code per row. When provided, this list replaces all currently selected products on Save. Missing or ambiguous SAP codes block saving. Leave blank to keep using the checkbox selection below.</p>
+                        <div class="mt-3 rounded border border-blue-200 bg-white p-3">
+                <label class="block text-sm font-semibold">Upload SAP codes from Excel (.xlsx or .csv; maximum 4 MB)</label>
+                <p class="mt-1 text-xs text-slate-600">Use a single SAP-code column, optionally headed SAP Code; or a multi-column file with a SAP Code header. First worksheet only. Maximum 10,000 rows. Uploaded codes replace the pasted list below, not the Product Registry.</p>
+                <div x-data="{ fileName: '' }" class="mt-3">
+                    <label class="relative flex min-h-28 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-blue-300 bg-blue-50 px-4 py-5 text-center transition hover:border-blue-600 hover:bg-blue-100 focus-within:ring-2 focus-within:ring-blue-600">
+                        <span class="inline-flex items-center justify-center rounded-lg bg-blue-700 px-5 py-3 text-sm font-bold text-white shadow-sm">
+                            Choose Excel / CSV File
+                        </span>
+                        <span class="text-xs text-slate-600">Click here to browse your computer (.xlsx or .csv, max 4 MB)</span>
+                        <input type="file" wire:model="sapExcelFile" accept=".xlsx,.csv" aria-label="Choose Excel or CSV SAP code file" class="absolute inset-0 h-full w-full cursor-pointer opacity-0" x-on:change="fileName = $event.target.files?.[0]?.name || ''">
+                    </label>
+                    <p class="mt-2 break-all text-sm" aria-live="polite" x-text="fileName ? 'Selected file: ' + fileName : 'No file selected yet.'"></p>
+                </div>
+                @error('sapExcelFile')<p class="mt-1 text-sm text-red-700">{{ $message }}</p>@enderror
+                <button type="button" wire:click="importSapExcel" wire:loading.attr="disabled" wire:target="sapExcelFile,importSapExcel" class="mt-2 rounded bg-blue-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Read uploaded SAP codes</button>
+                <span wire:loading wire:target="sapExcelFile,importSapExcel" class="ml-2 text-sm">Processing upload...</span>
+            </div>
             <textarea wire:model="bulkSapInput" rows="6" class="mt-3 w-full rounded border p-3 font-mono text-sm" placeholder="MOCK-00001&#10;MOCK-00002"></textarea>
             @error('bulkSapInput')<p class="mt-2 text-sm text-red-700">{{ $message }}</p>@enderror
             <button type="button" wire:click="previewBulkSap" wire:loading.attr="disabled" wire:target="previewBulkSap" class="mt-2 rounded px-4 py-2 text-white" style="background-color:#1d4ed8">Validate pasted codes</button>
