@@ -1,9 +1,15 @@
 <div class="min-h-screen bg-slate-100 p-6">
     <main class="max-w-7xl mx-auto">
 
-        <a href="{{ route('admin.master-data') }}" class="text-blue-700 hover:underline">
-            &larr; Back to Master Data
-        </a>
+        @can('manage-master-data')
+            <a href="{{ route('admin.master-data') }}" class="text-blue-700 hover:underline">
+                &larr; Back to Master Data
+            </a>
+        @else
+            <a href="{{ route('dashboard') }}" class="text-blue-700 hover:underline">
+                &larr; Back to Dashboard
+            </a>
+        @endcan
 
         <div class="mt-6 mb-8">
             <h1 class="text-3xl font-bold">

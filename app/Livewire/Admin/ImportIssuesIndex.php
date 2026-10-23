@@ -29,8 +29,24 @@ class ImportIssuesIndex extends Component
         $this->resetPage();
     }
 
+    private function authorizeViewer(): void
+    {
+        $user = auth()->user();
+        abort_unless(
+            $user && $user->is_active &&
+            ($user->can('manage-master-data') || $user->hasRole('global-ra')),
+            403
+        );
+    }
+
+    public function mount(): void
+    {
+        $this->authorizeViewer();
+    }
+
     public function render()
     {
+        $this->authorizeViewer();
         $issues = DB::table('master_import_issues')
             ->when(
                 $this->source !== '',

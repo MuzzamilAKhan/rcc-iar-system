@@ -117,6 +117,16 @@
                 </a>
             @endcan
 
+            {{-- Read-only Import Issues access for Global RA. Admin users retain their Master Data navigation. --}}
+            @if (auth()->user()->can('manage-master-data') || auth()->user()->hasRole('global-ra'))
+                <a href="{{ route('admin.import-issues') }}"
+                    class="rounded-xl bg-white p-8 shadow transition hover:shadow-lg">
+                    <h3 class="mb-2 text-xl font-bold">Import Issues</h3>
+                    <p class="text-slate-500">Review master data quality exceptions (read-only)</p>
+                    <p class="mt-4 font-semibold text-blue-700">View Import Issues &rarr;</p>
+                </a>
+            @endif
+
         </div>
 
     </main>
