@@ -18,6 +18,17 @@ class CreateDraft extends Component
     public string $dueAt = '';
     public string $productSearch = '';
     public array $selectedProductIds = [];
+    public string $bulkSapInput = '';
+    public ?array $bulkSapReport = null;
+
+
+
+    public function previewBulkSap(\App\Services\Iar\PreviewBulkSapCodes $preview): void
+    {
+        $this->authorizeCreator();
+        $this->resetErrorBag('bulkSapInput');
+        $this->bulkSapReport = $preview->inspect($this->bulkSapInput);
+    }
 
     private function authorizeCreator(): void
     {

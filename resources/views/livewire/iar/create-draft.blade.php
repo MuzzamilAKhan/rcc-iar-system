@@ -52,6 +52,23 @@
                 <p class="text-sm text-red-700">{{ $message }}</p> @enderror
             </div>
         </div>
+        <section class="rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <h3 class="font-semibold">Bulk SAP code validation (Excel paste)</h3>
+            <p class="mt-1 text-sm text-slate-600">Copy a column of SAP codes from Excel, paste below, and preview matches, duplicates and missing codes. This preview makes no database changes. The existing 30-product selection/save workflow remains unchanged until override requirements are confirmed.</p>
+            <textarea wire:model="bulkSapInput" rows="7" class="mt-3 w-full rounded border p-3 font-mono text-sm" placeholder="00012345 (one code per line)"></textarea>
+            @error('bulkSapInput') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
+            <button type="button" wire:click="previewBulkSap" wire:loading.attr="disabled" wire:target="previewBulkSap" class="mt-2 rounded bg-blue-700 px-4 py-2 font-semibold text-white">Validate pasted SAP codes</button>
+            @if ($bulkSapReport !== null)
+                <div class="mt-4 rounded bg-white p-3 text-sm">
+                    <p><strong>{{ $bulkSapReport['total_entries'] }}</strong> entries; <strong>{{ $bulkSapReport['matched_count'] }}</strong> matched; <strong>{{ $bulkSapReport['missing_count'] }}</strong> missing; <strong>{{ $bulkSapReport['ambiguous_count'] }}</strong> ambiguous; <strong>{{ $bulkSapReport['duplicate_count'] }}</strong> duplicates.</p>
+                    @if ($bulkSapReport['missing_preview'])<p class="mt-2 text-amber-800"><strong>Missing (first 100):</strong> {{ implode(', ', $bulkSapReport['missing_preview']) }}</p>@endif
+                    @if ($bulkSapReport['ambiguous_preview'])<p class="mt-2 text-amber-800"><strong>Ambiguous (first 100):</strong> {{ implode(', ', $bulkSapReport['ambiguous_preview']) }}</p>@endif
+                    @if ($bulkSapReport['duplicate_preview'])<p class="mt-2 text-amber-800"><strong>Duplicates (first 100):</strong> {{ implode(', ', $bulkSapReport['duplicate_preview']) }}</p>@endif
+                    @if ($bulkSapReport['matched_preview'])<p class="mt-2 text-green-800"><strong>Matched examples:</strong> {{ implode(', ', array_column($bulkSapReport['matched_preview'], 'code')) }}</p>@endif
+                </div>
+            @endif
+        </section>
+
         <section class="rounded-lg border p-4">
             <h3 class="font-semibold">Affected Products *</h3>
             <p class="mt-1 text-xs text-slate-500">Select at least one product (maximum 30). Search by SAP code or
