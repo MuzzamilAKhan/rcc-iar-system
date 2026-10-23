@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Submission Readiness | {{ $impactAssessment->iar_number }}</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
+<body class="min-h-screen bg-slate-100 text-slate-900">
+    <main class="mx-auto max-w-6xl p-6">
+        <a href="{{ route('iar.show', $impactAssessment) }}" class="text-blue-700">&larr; IAR details</a>
+        <div class="mt-5 rounded-xl bg-white p-6 shadow-sm">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold">Submission Readiness</h1>
+                    <p class="mt-1 text-slate-600">{{ $report['iar_number'] }} &middot; Read-only preview</p>
+                </div>
+                <span
+                    class="rounded px-3 py-1 text-sm {{ $report['can_submit'] ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
+                    {{ $report['can_submit'] ? 'Ready (preview only)' : 'Blocked' }}
+                </span>
+            </div>
+            <div class="mt-6 grid gap-4 sm:grid-cols-3">
+                <div class="rounded-lg bg-slate-50 p-4">
+                    <div class="text-2xl font-bold">{{ $report['product_count'] }}</div>
+                    <div class="text-sm text-slate-600">Products</div>
+                </div>
+                <div class="rounded-lg bg-slate-50 p-4">
+                    <div class="text-2xl font-bold">{{ $report['country_count'] }}</div>
+                    <div class="text-sm text-slate-600">Countries</div>
+                </div>
+                <div class="rounded-lg bg-slate-50 p-4">
+                    <div class="text-2xl font-bold">{{ $report['ready_count'] }}</div>
+                    <div class="text-sm text-slate-600">Countries ready</div>
+                </div>
+            </div>
+            @if ($report['blockers'])
+                <div class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-4">
+                    <h2 class="font-semibold">Submission blockers</h2>
+                    <ul class="mt-2 list-disc space-y-1 pl-5 text-sm">
+                        @foreach ($report['blockers'] as $blocker)
+                        <li>{{ $blocker }}</li>@endforeach
+                    </ul>
+                </div>
+            @endif
+            <div class="mt-6 overflow-x-auto">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-100">
+                        <tr>
+                            <th class="p-3">Country</th>
+                            <th class="p-3">Assignment strategy</th>
+                            <th class="p-3">Proposed assignee</th>
+                            <th class="p-3">Readiness / Reason</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse ($report['countries'] as $country)
+                            <tr class="border-b">
+                                <td class="p-3 font-medium">{{ $country['country'] }}</td>
+                                <td class="p-3">{{ str_replace('_', ' ', $country['strategy']) }}</td>
+                                <td class="p-3">{{ $country['assignee'] ?? 'Not available' }}</td>
+                                <td class="p-3">
+                                    @if ($country['ready'])<span class="font-medium text-green-700">Ready</span>
+                                    @else <ul class="list-disc pl-4 text-amber-800">
+                                        @foreach ($country['blockers'] as $reason)
+                                        <li>{{ $reason }}</li>@endforeach
+                                    </ul>@endif
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="4" class="p-6 text-slate-500">No countries identified.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-6 text-sm text-slate-500">This page never submits an IAR, creates assignments, activates
+                contacts, or sends notifications. Submission will be developed separately in Phase 5C.2.</p>
+        </div>
+    </main>
+</body>
+
+</html>
