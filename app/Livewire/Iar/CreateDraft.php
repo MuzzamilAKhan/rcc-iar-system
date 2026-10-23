@@ -70,6 +70,7 @@ class CreateDraft extends Component
             'estimated_implementation_date' => $this->estimatedImplementationDate ?: null,
             'due_at' => $this->dueAt,
             'product_ids' => $this->selectedProductIds,
+            'bulk_sap_input' => $this->bulkSapInput,
         ]);
 
         session()->flash('success', 'IAR draft created successfully.');

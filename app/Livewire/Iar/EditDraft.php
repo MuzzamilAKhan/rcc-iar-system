@@ -20,6 +20,8 @@ class EditDraft extends Component
     public string $dueAt = '';
     public string $productSearch = '';
     public array $selectedProductIds = [];
+    public string $bulkSapInput = '';
+    public ?array $bulkSapReport = null;
 
     public function mount(ImpactAssessment $impactAssessment): void
     {
@@ -57,6 +59,13 @@ class EditDraft extends Component
         return view('livewire.iar.edit-draft', compact('iar', 'products', 'selectedProducts'));
     }
 
+    public function previewBulkSap(\App\Services\Iar\PreviewBulkSapCodes $preview): void
+    {
+        $this->authorizeEdit(ImpactAssessment::findOrFail($this->iarId));
+        $this->resetErrorBag('bulkSapInput');
+        $this->bulkSapReport = $preview->inspect($this->bulkSapInput);
+    }
+
     public function save(UpdateIarDraft $service)
     {
         $iar = $service->update(auth()->user(), $this->iarId, [
@@ -69,6 +78,7 @@ class EditDraft extends Component
             'estimated_implementation_date' => $this->estimatedImplementationDate ?: null,
             'due_at' => $this->dueAt,
             'product_ids' => $this->selectedProductIds,
+            'bulk_sap_input' => $this->bulkSapInput,
         ]);
         session()->flash('success', 'Draft updated successfully.');
         return $this->redirectRoute('iar.show', ['impactAssessment' => $iar->id], navigate: true);

@@ -15,8 +15,20 @@
             <label><input type="checkbox" wire:model="labellingImpacted"> Labelling impacted</label>
             <label><input type="checkbox" wire:model="isUrgent"> Urgent</label>
         </div>
+        <section class="rounded border border-blue-200 bg-blue-50 p-4">
+            <h3 class="font-semibold">Replace affected products using Excel SAP codes</h3>
+            <p class="mt-1 text-sm text-slate-600">Optional: Paste one SAP code per row. When provided, this list replaces all currently selected products on Save. Missing or ambiguous SAP codes block saving. Leave blank to keep using the checkbox selection below.</p>
+            <textarea wire:model="bulkSapInput" rows="6" class="mt-3 w-full rounded border p-3 font-mono text-sm" placeholder="MOCK-00001&#10;MOCK-00002"></textarea>
+            @error('bulkSapInput')<p class="mt-2 text-sm text-red-700">{{ $message }}</p>@enderror
+            <button type="button" wire:click="previewBulkSap" wire:loading.attr="disabled" wire:target="previewBulkSap" class="mt-2 rounded px-4 py-2 text-white" style="background-color:#1d4ed8">Validate pasted codes</button>
+            @if ($bulkSapReport !== null)
+                <p class="mt-3 text-sm">{{ $bulkSapReport['matched_count'] }} matched; {{ $bulkSapReport['missing_count'] }} missing; {{ $bulkSapReport['ambiguous_count'] }} ambiguous; {{ $bulkSapReport['duplicate_count'] }} duplicates.</p>
+                @if ($bulkSapReport['missing_preview'])<p class="text-sm text-amber-800">Missing: {{ implode(', ', $bulkSapReport['missing_preview']) }}</p>@endif
+                @if ($bulkSapReport['ambiguous_preview'])<p class="text-sm text-amber-800">Ambiguous: {{ implode(', ', $bulkSapReport['ambiguous_preview']) }}</p>@endif
+            @endif
+        </section>
         <div class="rounded border p-4">
-            <label class="mb-2 block font-semibold">Affected SAP Products (1 to 30)</label>
+            <label class="mb-2 block font-semibold">Affected SAP Products (manual selection)</label>
             <input type="search" wire:model.live.debounce.400ms="productSearch" placeholder="Search SAP code or product name" class="mb-3 w-full rounded border p-3">
             <div class="mb-3"><h3 class="text-sm font-semibold">Selected products</h3>
                 @forelse($selectedProducts as $product)

@@ -54,7 +54,7 @@
         </div>
         <section class="rounded-lg border border-blue-200 bg-blue-50 p-4">
             <h3 class="font-semibold">Bulk SAP code validation (Excel paste)</h3>
-            <p class="mt-1 text-sm text-slate-600">Copy a column of SAP codes from Excel, paste below, and preview matches, duplicates and missing codes. This preview makes no database changes. The existing 30-product selection/save workflow remains unchanged until override requirements are confirmed.</p>
+            <p class="mt-1 text-sm text-slate-600">Copy a column of SAP codes from Excel, paste below, and preview matches, duplicates and missing codes. Validation shows issues without database changes. On Save, pasted codes take priority over checkboxes; only fully matched lists can be saved. Duplicate pasted lines are automatically deduplicated. Missing or ambiguous SAP codes block saving until resolved.</p>
             <textarea wire:model="bulkSapInput" rows="7" class="mt-3 w-full rounded border p-3 font-mono text-sm" placeholder="00012345 (one code per line)"></textarea>
             @error('bulkSapInput') <p class="text-sm text-red-700">{{ $message }}</p> @enderror
             <button type="button" wire:click="previewBulkSap" wire:loading.attr="disabled" wire:target="previewBulkSap" class="mt-2 rounded bg-blue-700 px-4 py-2 font-semibold text-white">Validate pasted SAP codes</button>
@@ -71,7 +71,7 @@
 
         <section class="rounded-lg border p-4">
             <h3 class="font-semibold">Affected Products *</h3>
-            <p class="mt-1 text-xs text-slate-500">Select at least one product (maximum 30). Search by SAP code or
+            <p class="mt-1 text-xs text-slate-500">Alternatively select products manually. When SAP codes are pasted above, the pasted list replaces checkbox selections. Search by SAP code or
                 product name.</p>
             <input type="search" wire:model.live.debounce.350ms="productSearch"
                 class="mt-3 w-full rounded-lg border p-3" placeholder="Search SAP code / product...">

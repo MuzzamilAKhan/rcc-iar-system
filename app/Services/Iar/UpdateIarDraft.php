@@ -23,8 +23,9 @@ class UpdateIarDraft
             'is_urgent' => ['required', 'boolean'],
             'estimated_implementation_date' => ['nullable', 'date'],
             'due_at' => ['required', 'date', 'after:now'],
-            'product_ids' => ['required', 'array', 'min:1', 'max:30'],
-            'product_ids.*' => ['required', 'integer', 'distinct', 'exists:products,id'],
+            'product_ids' => ['nullable', 'array', 'max:10000'],
+            'bulk_sap_input' => ['nullable', 'string', 'max:1100000'],
+            'product_ids.*' => ['required', 'integer', 'distinct'],
         ])->validate();
 
         return DB::transaction(function () use ($actor, $iarId, $validated) {
@@ -34,8 +35,20 @@ class UpdateIarDraft
                 throw ValidationException::withMessages(['draft' => 'Only draft IARs may be edited.']);
             }
 
-            $products = Product::query()->whereIn('id', $validated['product_ids'])->get(['id', 'sap_code']);
-            if ($products->count() !== count($validated['product_ids']) ||
+            $bulk = trim((string) ($validated['bulk_sap_input'] ?? ''));
+                    if ($bulk !== '') {
+                        $products = app(ResolveBulkIarProducts::class)->resolve($bulk);
+                    } else {
+                        $ids = $validated['product_ids'] ?? [];
+                        if (!$ids) {
+                            throw ValidationException::withMessages(['product_ids' => 'Select products or paste SAP codes first.']);
+                        }
+                        $products = collect();
+                        foreach (array_chunk($ids, 400) as $chunk) {
+                            $products = $products->concat(Product::query()->whereIn('id', $chunk)->get(['id', 'sap_code']));
+                        }
+                    }
+            if (($bulk === '' && $products->count() !== count($validated['product_ids'] ?? [])) ||
                 $products->pluck('sap_code')->unique()->count() !== $products->count()) {
                 throw ValidationException::withMessages(['product_ids' => 'Select available products with distinct SAP codes.']);
             }
@@ -56,11 +69,16 @@ class UpdateIarDraft
 
             $iar->update($fields);
             $iar->products()->delete();
-            foreach ($products as $product) {
-                $iar->products()->create([
+            $now = now();
+            foreach ($products->chunk(400) as $chunk) {
+                $rows = $chunk->map(fn ($product) => [
+                    'impact_assessment_id' => $iar->id,
                     'product_id' => $product->id,
                     'submitted_sap_code' => $product->sap_code,
-                ]);
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ])->all();
+                DB::table('iar_products')->insert($rows);
             }
 
             DB::table('audit_logs')->insert([
