@@ -24,6 +24,17 @@ class ProductsIndex extends Component
         $this->resetPage();
     }
 
+    public function exportRegistry(string $scope)
+    {
+        abort_unless(auth()->user()?->is_active && auth()->user()?->can('manage-master-data'), 403);
+        abort_unless(in_array($scope, ['all', 'filtered'], true), 422);
+        return redirect()->route('admin.products.export', [
+            'scope' => $scope,
+            'search' => $scope === 'filtered' ? $this->search : '',
+            'business_unit' => $scope === 'filtered' ? $this->businessUnit : '',
+        ]);
+    }
+
     public function render()
     {
         $products = Product::query()

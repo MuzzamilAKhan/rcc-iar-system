@@ -31,6 +31,12 @@
                 </select>
             </div>
 
+            <div class="mb-5 flex flex-wrap items-center gap-3">
+                <button type="button" wire:click="exportRegistry('all')" class="rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white">Export Full Registry (.xlsx)</button>
+                <button type="button" wire:click="exportRegistry('filtered')" class="rounded-lg border border-blue-700 px-4 py-2 text-sm font-semibold text-blue-700">Export Filtered Results (.xlsx)</button>
+                <p class="text-xs text-slate-500">Export uses one row per country registration. Products with no registration are flagged. Full export ignores filters.</p>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead class="bg-slate-50 border-b">

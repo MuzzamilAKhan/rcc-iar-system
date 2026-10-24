@@ -30,6 +30,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     })->name('iar.show');
 });
 
+Route::middleware(['auth', 'active', 'can:manage-master-data'])
+    ->get('/admin/products/export/xlsx', \App\Http\Controllers\ProductRegistryExportController::class)
+    ->name('admin.products.export');
+
 Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function () {
     Route::get('/admin/master-data', fn() => view('admin.master-data'))->name('admin.master-data');
     Route::get('/admin/products', fn() => view('admin.products'))->name('admin.products');
