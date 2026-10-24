@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Models\ImpactAssessment;
 
-Route::get('/', fn() => view('welcome'));
+Route::get('/', fn() => redirect()->route(auth()->check() ? 'dashboard' : 'login'));
 
 Route::middleware(['auth', 'active'])->get('/dashboard', fn() => view('dashboard'))->name('dashboard');
 Route::middleware(['auth', 'active', 'can:iar.create'])->get('/iars/create', fn() => view('iar.create'))->name('iar.create');
