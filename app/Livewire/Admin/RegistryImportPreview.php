@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Product;
 use App\Models\Country;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -18,6 +19,7 @@ class RegistryImportPreview extends Component
     public $registryFile = null;
     public array $previewRows = [];
     public array $summary = [];
+    public string $submissionReason = '';
 
     private function authorizeManager(): void
     {
@@ -109,8 +111,51 @@ class RegistryImportPreview extends Component
                     'result'=>$status,'reason'=>$reason];
             }
             $this->summary=$counts;
+            // Private, session-bound staging survives Livewire's separate submit request.
+            $oldStage = session('phase5i2b_staged_upload');
+            if (is_array($oldStage) && ($oldStage['user_id'] ?? null) === auth()->id()) {
+                Storage::disk('local')->delete($oldStage['path'] ?? '');
+            }
+            $extSafe = strtolower($ext);
+            $stagedName = (string) \Illuminate\Support\Str::uuid().'.'.$extSafe;
+            $storedPath = $this->registryFile->storeAs('registry-import-staging', $stagedName, 'local');
+            if (!$storedPath) {
+                throw ValidationException::withMessages(['registryFile'=>'Could not stage the validated file.']);
+            }
+            session(['phase5i2b_staged_upload'=>[
+                'user_id'=>auth()->id(),
+                'path'=>$storedPath,
+                'filename'=>$this->registryFile->getClientOriginalName(),
+                'sha256'=>hash_file('sha256', Storage::disk('local')->path($storedPath)),
+            ]]);
             $this->reset('registryFile');
+            $this->resetValidation('registryFile');
         } finally { $book->disconnectWorksheets(); }
+    }
+
+    public function submitApprovalRequest(\App\Services\RegistryImport\RegistryImportWorkflow $workflow, \App\Services\RegistryImport\RegistryImportParser $parser): void
+    {
+        $this->authorizeManager();
+        $this->validate(['submissionReason'=>['required','string','min:15','max:2000']]);
+        $stage = session('phase5i2b_staged_upload');
+        if (!is_array($stage) || ($stage['user_id'] ?? null) !== auth()->id() ||
+            empty($stage['path']) || !str_starts_with($stage['path'], 'registry-import-staging/') ||
+            !Storage::disk('local')->exists($stage['path'])) {
+            throw ValidationException::withMessages(['registryFile'=>'Preview the uploaded Excel/CSV file again before submitting.']);
+        }
+        $absolutePath = Storage::disk('local')->path($stage['path']);
+        if (!hash_equals((string)($stage['sha256'] ?? ''), hash_file('sha256', $absolutePath))) {
+            throw ValidationException::withMessages(['registryFile'=>'Staged file changed. Please preview the file again.']);
+        }
+        // Review server-side original file; never trust client previewRows/summary.
+        $uploaded = new \Illuminate\Http\UploadedFile(
+            $absolutePath, (string)$stage['filename'], null, null, true
+        );
+        $id = $workflow->submit(auth()->user(), $uploaded, $this->submissionReason, $parser);
+        Storage::disk('local')->delete($stage['path']);
+        session()->forget('phase5i2b_staged_upload');
+        $this->reset('registryFile','previewRows','summary','submissionReason');
+        $this->redirectRoute('admin.products.import.requests.show',['id'=>$id],navigate:false);
     }
 
     public function render()

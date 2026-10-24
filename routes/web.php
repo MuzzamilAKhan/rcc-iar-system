@@ -98,3 +98,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/profile/timezone', [\App\Http\Controllers\TimezonePreferenceController::class, 'edit'])->name('profile.timezone.edit');
     Route::put('/profile/timezone', [\App\Http\Controllers\TimezonePreferenceController::class, 'update'])->name('profile.timezone.update');
 });
+
+// Phase 5I.2B: import review queue. Independent Super Admin approval only.
+Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function () {
+    Route::get('/admin/products/import/requests', [\App\Http\Controllers\RegistryImportApprovalController::class, 'index'])->name('admin.products.import.requests');
+    Route::get('/admin/products/import/requests/{id}', [\App\Http\Controllers\RegistryImportApprovalController::class, 'show'])->name('admin.products.import.requests.show');
+    Route::post('/admin/products/import/requests/{id}/decision', [\App\Http\Controllers\RegistryImportApprovalController::class, 'decide'])->name('admin.products.import.requests.decide');
+});

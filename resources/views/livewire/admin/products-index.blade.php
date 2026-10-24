@@ -42,7 +42,8 @@
                 <p class="mt-1 text-xs text-amber-800">Preview only. No changes are applied to master data.</p>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="mt-3"><a class="text-blue-700 underline" href="{{ route('admin.products.import.requests') }}">View Registry Import Approval Queue &rarr;</a></div>
+<div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead class="bg-slate-50 border-b">
                         <tr>

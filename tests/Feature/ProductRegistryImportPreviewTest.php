@@ -14,7 +14,7 @@ class ProductRegistryImportPreviewTest extends TestCase
     {
         $manager=User::factory()->create(['is_active'=>true]); $manager->assignRole('master-data-manager');
         $local=User::factory()->create(['is_active'=>true]); $local->assignRole('local-ra');
-        $this->actingAs($manager)->get(route('admin.products.import.preview'))->assertOk()->assertSee('PREVIEW ONLY');
+        $this->actingAs($manager)->get(route('admin.products.import.preview'))->assertOk()->assertSee('PREVIEW FIRST');
         $this->actingAs($local)->get(route('admin.products.import.preview'))->assertForbidden();
     }
 }
