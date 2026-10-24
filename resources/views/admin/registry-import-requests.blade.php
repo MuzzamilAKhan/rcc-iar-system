@@ -1,4 +1,6 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registry Import Requests</title>@vite(['resources/css/app.css','resources/js/app.js'])</head><body class="bg-slate-100 p-7"><main class="mx-auto max-w-6xl rounded-xl bg-white p-7"><a href="{{ route('admin.products') }}" class="text-blue-700">&larr; Product Registry</a><h1 class="my-5 text-2xl font-bold">Registry Import Approval Queue</h1>@php
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registry Import Requests</title>@vite(['resources/css/app.css','resources/js/app.js'])</head><body class="bg-slate-100 p-7">
+@include('partials.regatlas-navigation')
+<main class="mx-auto max-w-6xl rounded-xl bg-white p-7"><a href="{{ route('admin.products') }}" class="text-blue-700">&larr; Product Registry</a><h1 class="my-5 text-2xl font-bold">Registry Import Approval Queue</h1>@php
  $viewerTimezone = auth()->user()?->timezone ?: 'UTC';
  $uploaderNames = \App\Models\User::query()->whereIn('id', $requests->pluck('uploaded_by')->all())->pluck('name', 'id');
 @endphp

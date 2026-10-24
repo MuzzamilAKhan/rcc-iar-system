@@ -7,7 +7,7 @@
     <title>Sign in | RegAtlas</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="min-h-screen bg-[#f5f7fb] text-slate-900 antialiased">
+<body class="min-h-screen bg-[#f5f7fb] text-slate-900 antialiased ra-login">
 <main class="min-h-screen lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(440px,.95fr)]">
     <section class="relative hidden overflow-hidden bg-[#102b46] p-10 text-white lg:flex lg:flex-col lg:justify-between xl:p-16" aria-label="RegAtlas platform introduction">
         <div class="pointer-events-none absolute -right-36 -top-36 h-[530px] w-[530px] rounded-full border border-white/10"></div>

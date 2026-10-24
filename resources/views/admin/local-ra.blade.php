@@ -12,6 +12,8 @@
 </head>
 
 <body>
+@include('partials.regatlas-navigation')
+
     <livewire:admin.local-ra-contacts />
     @livewireScripts
 </body>

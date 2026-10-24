@@ -13,6 +13,8 @@
 </head>
 
 <body>
+@include('partials.regatlas-navigation')
+
     <livewire:admin.master-data-dashboard />
 
     @livewireScripts

@@ -10,29 +10,22 @@
 </head>
 
 <body class="min-h-screen bg-slate-100">
+@include('partials.regatlas-navigation')
+@include('partials.regatlas-timezone-reminder')
 
-    {{-- Top Navigation --}}
-    <nav class="flex justify-between bg-white p-5 shadow">
-        <h1 class="text-xl font-bold">RCC-IAR System</h1>
-
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <button type="submit" class="font-semibold text-red-600">
-                Logout
-            </button>
-        </form>
-    </nav>
 
     {{-- Dashboard --}}
     <main class="mx-auto max-w-6xl px-5 py-12">
 
-        <h2 class="mb-2 text-2xl font-bold">
+        <div class="ra-dashboard-hero">
+<h2 class="mb-2 text-2xl font-bold">
             Welcome, {{ auth()->user()->name }}
         </h2>
 
         <p class="mb-8 text-slate-500">
             Regulatory Impact Assessment Dashboard
         </p>
+</div>
 
         <p class="mb-5 text-sm"><a class="font-semibold text-blue-700 hover:underline" href="{{ route('profile.timezone.edit') }}">My Timezone</a> <span class="text-slate-500">({{ auth()->user()->timezone ?: 'UTC' }})</span></p>
         <div class="grid gap-6 md:grid-cols-2">

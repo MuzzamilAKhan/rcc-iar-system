@@ -1,4 +1,6 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registry Import Review</title>@vite(['resources/css/app.css','resources/js/app.js'])</head><body class="bg-slate-100 p-7"><main class="mx-auto max-w-7xl rounded-xl bg-white p-7"><a href="{{ route('admin.products.import.requests') }}" class="text-blue-700">&larr; Approval Queue</a>@php
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registry Import Review</title>@vite(['resources/css/app.css','resources/js/app.js'])</head><body class="bg-slate-100 p-7">
+@include('partials.regatlas-navigation')
+<main class="mx-auto max-w-7xl rounded-xl bg-white p-7"><a href="{{ route('admin.products.import.requests') }}" class="text-blue-700">&larr; Approval Queue</a>@php
  $viewerTimezone = auth()->user()?->timezone ?: 'UTC';
  $people = \App\Models\User::query()->whereIn('id', array_filter([$batch->uploaded_by, $batch->reviewed_by]))->pluck('name', 'id');
 @endphp

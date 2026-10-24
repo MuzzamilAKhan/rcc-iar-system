@@ -12,6 +12,8 @@
 </head>
 
 <body>
+@include('partials.regatlas-navigation')
+
     {{ $slot }}
 
     @livewireScripts

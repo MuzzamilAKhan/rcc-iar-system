@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>My Assigned Assessments | RCC-IAR</title>@vite(['resources/css/app.css', 'resources/js/app.js'])</head>
-<body class="min-h-screen bg-slate-100 text-slate-900"><main class="mx-auto max-w-6xl p-6">
+<body class="min-h-screen bg-slate-100 text-slate-900">
+@include('partials.regatlas-navigation')
+<main class="mx-auto max-w-6xl p-6">
 <a class="text-blue-700" href="{{ route('dashboard') }}">&larr; Dashboard</a>
 <div class="mt-5 rounded-xl bg-white p-6 shadow-sm">
 <h1 class="text-2xl font-bold">My Assigned Assessments</h1>

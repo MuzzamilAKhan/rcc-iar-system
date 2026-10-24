@@ -7,6 +7,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-100 text-slate-900">
+@include('partials.regatlas-navigation')
+
 <main class="mx-auto max-w-6xl p-6">
     <a href="{{ route('iar.show', $impactAssessment) }}" class="text-blue-700">&larr; IAR details</a>
     <div class="mt-5 rounded-xl bg-white p-6 shadow-sm">

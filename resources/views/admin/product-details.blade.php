@@ -11,6 +11,8 @@
 </head>
 
 <body class="min-h-screen bg-slate-100 p-6">
+@include('partials.regatlas-navigation')
+
 
     <main class="max-w-7xl mx-auto">
 

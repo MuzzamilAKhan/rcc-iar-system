@@ -7,6 +7,8 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="min-h-screen bg-slate-100">
+@include('partials.regatlas-navigation')
+
 <main class="mx-auto max-w-2xl px-5 py-12">
     <a class="text-blue-700 hover:underline" href="{{ route('dashboard') }}">&larr; Dashboard</a>
     <section class="mt-6 rounded-xl bg-white p-6 shadow-sm">

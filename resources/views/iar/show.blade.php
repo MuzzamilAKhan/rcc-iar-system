@@ -9,6 +9,8 @@
 </head>
 
 <body class="min-h-screen bg-slate-100">
+@include('partials.regatlas-navigation')
+
     <main class="mx-auto max-w-5xl p-6">
         {{-- Navigation and actions --}}
         <div class="flex flex-wrap items-center justify-between gap-4">

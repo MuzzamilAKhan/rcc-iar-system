@@ -10,6 +10,8 @@
 </head>
 
 <body>
+@include('partials.regatlas-navigation')
+
     <livewire:admin.user-provisioning />
     @livewireScripts
 </body>
