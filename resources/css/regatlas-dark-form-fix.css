@@ -1,0 +1,41 @@
+/* Phase 5M.2 hotfix: preserve readable contrast in dark-mode form subpanels.
+   Scoped to authenticated pages; no change to RegAtlas sign-in or light mode. */
+html[data-ra-theme="dark"] body:not(.ra-login) :is(.bg-blue-50,.bg-blue-100) {
+    background-color: #1c3449;
+    color: #eaf4fc;
+    border-color: #49708a;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) :is(.border-blue-200,.border-blue-300) {
+    border-color: #49708a;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) .bg-amber-50 {
+    background-color: #3b3020;
+    color: #fceac7;
+    border-color: #b98a39;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) :is(.border-amber-300,.border-amber-200) {
+    border-color: #b98a39;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) :is(.text-amber-900,.text-amber-800,.text-amber-700) {
+    color: #f9dea8;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) :is(.text-green-800,.text-green-700) {
+    color: #8ce4b0;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) :is(.text-red-800,.text-red-700) {
+    color: #ffc0c0;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) :is(.text-blue-800,.text-blue-700,.text-blue-600) {
+    color: #80ded8;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) :is(.bg-blue-700,.bg-blue-600) {
+    background-color: #0d7887;
+    color: #fff;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) .bg-blue-700:hover {
+    background-color: #096572;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) input[type="file"] { color: #eaf4fc; }
+html[data-ra-theme="dark"] body:not(.ra-login) :is(input,textarea,select):focus-visible {
+    outline-color: #73dccf;
+}

@@ -11,3 +11,6 @@
 }
 
 @import "./regatlas-theme.css";
+
+@import "./regatlas-enhancements.css";
+@import "./regatlas-dark-form-fix.css";
