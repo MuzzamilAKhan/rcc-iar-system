@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registry Import Review</title>@vite(['resources/css/app.css','resources/js/app.js'])</head><body class="bg-slate-100 p-7">
+<!doctype html><html lang="en"><head>
+    <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
+    <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Registry Import Review</title>@vite(['resources/css/app.css','resources/js/app.js'])</head><body class="bg-slate-100 p-7">
 @include('partials.regatlas-navigation')
 <main class="mx-auto max-w-7xl rounded-xl bg-white p-7"><a href="{{ route('admin.products.import.requests') }}" class="text-blue-700">&larr; Approval Queue</a>@php
  $viewerTimezone = auth()->user()?->timezone ?: 'UTC';
