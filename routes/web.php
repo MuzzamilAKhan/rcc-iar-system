@@ -83,3 +83,9 @@ Route::middleware(['auth', 'active', 'role:super-admin'])->get('/admin/users', f
     \Illuminate\Support\Facades\Route::post('/assessments/{assignment}/draft', [\App\Http\Controllers\AssessmentDraftController::class, 'save'])->name('assessment.save');
 });
 
+
+// Phase 5H.2 — authenticated user timezone preference (no admin access required).
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/profile/timezone', [\App\Http\Controllers\TimezonePreferenceController::class, 'edit'])->name('profile.timezone.edit');
+    Route::put('/profile/timezone', [\App\Http\Controllers\TimezonePreferenceController::class, 'update'])->name('profile.timezone.update');
+});

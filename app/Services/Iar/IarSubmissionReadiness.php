@@ -113,6 +113,12 @@ final class IarSubmissionReadiness
             ->where('impact_assessment_id', $iar->id)
             ->whereNull('product_id')
             ->count();
+        // Product exists but its registration list is empty: a separate
+        // master-data exception from a SAP code that does not exist at all.
+        $unregisteredCodes = $productIds->isEmpty() ? [] : DB::table('products')
+            ->whereIn('id', $productIds)
+            ->whereNotIn('id', DB::table('product_registrations')->select('product_id'))
+            ->orderBy('sap_code')->pluck('sap_code')->all();
         $globalBlockers = [];
         if ($unresolvedCount > 0) $globalBlockers[] = $unresolvedCount . ' unresolved SAP code(s) are retained for audit; submission is blocked until country assignment policy is confirmed and data issues are resolved.';
         if ($iar->status !== 'draft') $globalBlockers[] = 'Only draft IARs can be submitted.';
@@ -129,6 +135,8 @@ final class IarSubmissionReadiness
             'ready_count' => $rows->where('ready', true)->count(),
             'registration_issue_count' => $registrationIssues->count(),
             'unresolved_sap_count' => $unresolvedCount,
+            'unregistered_sap_codes' => $unregisteredCodes,
+            'unregistered_product_count' => $unregisteredProductCount,
             'can_submit' => $globalBlockers === [],
             'blockers' => $globalBlockers,
             'countries' => $rows->values()->all(),

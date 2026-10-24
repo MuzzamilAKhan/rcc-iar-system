@@ -34,6 +34,7 @@
             Regulatory Impact Assessment Dashboard
         </p>
 
+        <p class="mb-5 text-sm"><a class="font-semibold text-blue-700 hover:underline" href="{{ route('profile.timezone.edit') }}">My Timezone</a> <span class="text-slate-500">({{ auth()->user()->timezone ?: 'UTC' }})</span></p>
         <div class="grid gap-6 md:grid-cols-2">
 
             {{-- Create IAR --}}

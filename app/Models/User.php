@@ -31,6 +31,7 @@ class User extends Authenticatable
         'approved_at',
         'invited_at',
         'activated_at',
+        'timezone',
     ];
 
     /**

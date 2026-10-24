@@ -149,6 +149,47 @@
                     Unresolved SAP codes are retained for traceability. Submission remains blocked until applicable country assignment and registration issues are resolved.
                 </div>
             @endif
+            {{-- Phase 5H.2: read-only exception evidence for authorized IAR viewers. --}}
+            @php
+                $overrideAudits = \Illuminate\Support\Facades\DB::table('audit_logs')
+                    ->leftJoin('users', 'users.id', '=', 'audit_logs.actor_user_id')
+                    ->where('audit_logs.entity_type', \App\Models\ImpactAssessment::class)
+                    ->where('audit_logs.entity_id', $impactAssessment->id)
+                    ->whereIn('audit_logs.action', ['iar.sap.override.created', 'iar.sap.override.updated'])
+                    ->select('audit_logs.*', 'users.name as actor_name')
+                    ->orderBy('audit_logs.id')->get();
+                $linkedProductIds = $impactAssessment->products->pluck('product_id')->filter()->unique();
+                $withoutRegistration = $linkedProductIds->isEmpty() ? collect() : \Illuminate\Support\Facades\DB::table('products')
+                    ->whereIn('id', $linkedProductIds)
+                    ->whereNotIn('id', \Illuminate\Support\Facades\DB::table('product_registrations')->select('product_id'))
+                    ->orderBy('sap_code')->pluck('sap_code');
+            @endphp
+            @if ($withoutRegistration->isNotEmpty())
+                <section class="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4">
+                    <h2 class="font-semibold text-amber-900">Missing Country Registration Data</h2>
+                    <p class="mt-1 text-sm text-amber-900">These SAP codes exist in the Product Registry but have no registration records. Submission is blocked until registration data is reviewed and corrected.</p>
+                    <ul class="mt-2 list-disc pl-5 text-sm text-amber-900">
+                        @foreach ($withoutRegistration as $code)<li>{{ $code }}</li>@endforeach
+                    </ul>
+                </section>
+            @endif
+            @if ($overrideAudits->isNotEmpty())
+                <section class="mt-5 rounded-lg border p-4">
+                    <h2 class="font-semibold">SAP Override Audit History</h2>
+                    <p class="mt-1 text-xs text-slate-600">Historical decisions are retained even if the registry is later corrected.</p>
+                    @foreach ($overrideAudits as $entry)
+                        @php $evidence = json_decode($entry->new_values ?? '{}', true) ?: []; @endphp
+                        <div class="mt-3 border-t pt-3 text-sm">
+                            {{-- <p><strong>{{ $entry->actor_name ?? 'Former user' }}</strong> — {{ \Carbon\Carbon::parse($entry->created_at, 'UTC')->setTimezone(auth()->user()->timezone ?: 'UTC')->format('Y-m-d H:i:s T') }} ({{ auth()->user()->timezone ?: 'UTC' }}) — {{ $entry->action }}</p> --}}
+                            <p><strong>{{ $entry->actor_name ?? 'Former user' }}</strong> — {{ \Carbon\Carbon::parse($entry->created_at, 'UTC')->setTimezone('Asia/Karachi')->format('Y-m-d H:i:s') }} PKT — {{ $entry->action }}</p>
+                            <p class="mt-1 whitespace-pre-wrap"><strong>Justification:</strong> {{ $evidence['reason'] ?? 'Not available' }}</p>
+                            <p class="mt-1"><strong>Unresolved SAP codes:</strong> {{ implode(', ', $evidence['unresolved_sap_codes'] ?? []) }}</p>
+                            @if (!empty($evidence['unresolved_added']))<p>Added: {{ implode(', ', $evidence['unresolved_added']) }}</p>@endif
+                            @if (!empty($evidence['unresolved_removed']))<p>Removed: {{ implode(', ', $evidence['unresolved_removed']) }}</p>@endif
+                        </div>
+                    @endforeach
+                </section>
+            @endif
             {{-- Workflow information --}}
             <div class="mt-6 border-t border-slate-200 pt-5">
                 @if ($impactAssessment->status === 'draft')

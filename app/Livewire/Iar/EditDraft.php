@@ -42,7 +42,20 @@ class EditDraft extends Component
         $this->dueAt = $impactAssessment->due_at?->format('Y-m-d\TH:i') ?? '';
         $this->selectedProductIds = $impactAssessment->products()->whereNotNull('product_id')->pluck('product_id')->map(fn ($id) => (int) $id)->all();
         if ($impactAssessment->products()->whereNull('product_id')->exists()) {
+            // Always reload the complete original SAP list, not just matched products.
             $this->bulkSapInput = $impactAssessment->products()->orderBy('id')->pluck('submitted_sap_code')->implode("\n");
+            // Restore the last documented justification for an unresolved draft.
+            // This is only a prefill: saving validates the entire SAP list again.
+            $audit = \Illuminate\Support\Facades\DB::table('audit_logs')
+                ->where('entity_type', \App\Models\ImpactAssessment::class)
+                ->where('entity_id', $impactAssessment->id)
+                ->whereIn('action', ['iar.sap.override.created', 'iar.sap.override.updated'])
+                ->orderByDesc('id')->first();
+            $details = $audit ? json_decode((string) $audit->new_values, true) : null;
+            if (is_array($details) && is_string($details['reason'] ?? null)) {
+                $this->overrideWarnings = true;
+                $this->overrideReason = $details['reason'];
+            }
         }
     }
 

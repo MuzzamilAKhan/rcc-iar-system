@@ -75,6 +75,10 @@ class UpdateIarDraft
             $old = $iar->only(array_keys($fields));
             $old['product_ids'] = $iar->products()->orderBy('product_id')->pluck('product_id')->map(fn ($id) => (int) $id)->all();
             $old['submitted_sap_codes'] = $iar->products()->orderBy('id')->pluck('submitted_sap_code')->all();
+            $oldUnresolved = $iar->products()->whereNull('product_id')->pluck('submitted_sap_code')->all();
+            $newUnresolved = $bulkResolution['unresolved'] ?? [];
+            $addedUnresolved = array_values(array_diff($newUnresolved, $oldUnresolved));
+            $removedUnresolved = array_values(array_diff($oldUnresolved, $newUnresolved));
 
             $iar->update($fields);
             $iar->products()->delete();
@@ -99,7 +103,9 @@ class UpdateIarDraft
                 'new_values' => json_encode($fields + ['product_ids' => $products->pluck('id')->filter()->sort()->values()->all(),
                     'submitted_sap_codes' => $products->pluck('sap_code')->all(),
                     'unresolved_sap_codes' => $bulkResolution['unresolved'] ?? [],
-                    'override_reason' => $bulkResolution['reason'] ?? null], JSON_THROW_ON_ERROR),
+                    'override_reason' => $bulkResolution['reason'] ?? null,
+                    'unresolved_added' => $addedUnresolved,
+                    'unresolved_removed' => $removedUnresolved], JSON_THROW_ON_ERROR),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
@@ -110,7 +116,10 @@ class UpdateIarDraft
                     'entity_id' => $iar->id, 'action' => 'iar.sap.override.updated',
                     'old_values' => json_encode(['submitted_sap_codes' => $old['submitted_sap_codes']], JSON_THROW_ON_ERROR),
                     'new_values' => json_encode(['unresolved_sap_codes' => $bulkResolution['unresolved'],
-                        'reason' => $bulkResolution['reason'], 'submission_allowed' => false], JSON_THROW_ON_ERROR),
+                        'reason' => $bulkResolution['reason'],
+                        'unresolved_added' => $addedUnresolved,
+                        'unresolved_removed' => $removedUnresolved,
+                        'submission_allowed' => false], JSON_THROW_ON_ERROR),
                     'created_at' => now(), 'updated_at' => now(),
                 ]);
             }
