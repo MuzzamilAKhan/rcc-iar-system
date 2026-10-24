@@ -37,6 +37,11 @@
                 <p class="text-xs text-slate-500">Export uses one row per country registration. Products with no registration are flagged. Full export ignores filters.</p>
             </div>
 
+            <div class="mb-5">
+                <a href="{{ route('admin.products.import.preview') }}" class="inline-block rounded border border-amber-500 px-4 py-2 font-semibold text-amber-900">Preview Registry Import (.xlsx / .csv)</a>
+                <p class="mt-1 text-xs text-amber-800">Preview only. No changes are applied to master data.</p>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead class="bg-slate-50 border-b">

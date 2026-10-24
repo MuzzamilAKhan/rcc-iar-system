@@ -34,6 +34,11 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])
     ->get('/admin/products/export/xlsx', \App\Http\Controllers\ProductRegistryExportController::class)
     ->name('admin.products.export');
 
+// Phase 5I.2A: Preview only; never writes Product Registry records.
+Route::middleware(['auth', 'active', 'can:manage-master-data'])
+    ->get('/admin/products/import/preview', fn() => view('admin.registry-import-preview'))
+    ->name('admin.products.import.preview');
+
 Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function () {
     Route::get('/admin/master-data', fn() => view('admin.master-data'))->name('admin.master-data');
     Route::get('/admin/products', fn() => view('admin.products'))->name('admin.products');
