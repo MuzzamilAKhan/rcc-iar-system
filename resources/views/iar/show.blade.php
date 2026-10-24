@@ -135,7 +135,7 @@
                         <li class="mb-1">
                             {{ $item->submitted_sap_code }}
                             &mdash;
-                            {{ $item->product?->product_name ?? 'Product unavailable' }}
+                            {{ $item->product?->product_name ?? 'UNRESOLVED — not found in Product Registry' }}
                         </li>
                     @empty
                         <li class="text-slate-500">
@@ -144,6 +144,11 @@
                     @endforelse
                 </ul>
             </div>
+            @if ($impactAssessment->products->contains(fn ($item) => $item->product_id === null))
+                <div class="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
+                    Unresolved SAP codes are retained for traceability. Submission remains blocked until applicable country assignment and registration issues are resolved.
+                </div>
+            @endif
             {{-- Workflow information --}}
             <div class="mt-6 border-t border-slate-200 pt-5">
                 @if ($impactAssessment->status === 'draft')

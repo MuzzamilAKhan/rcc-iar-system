@@ -23,6 +23,8 @@ class EditDraft extends Component
     public array $selectedProductIds = [];
     use WithFileUploads;
 
+    public bool $overrideWarnings = false;
+    public string $overrideReason = '';
     public string $bulkSapInput = '';
     public ?array $bulkSapReport = null;
 
@@ -38,7 +40,10 @@ class EditDraft extends Component
         $this->isUrgent = $impactAssessment->is_urgent;
         $this->estimatedImplementationDate = $impactAssessment->estimated_implementation_date?->format('Y-m-d') ?? '';
         $this->dueAt = $impactAssessment->due_at?->format('Y-m-d\TH:i') ?? '';
-        $this->selectedProductIds = $impactAssessment->products()->pluck('product_id')->map(fn ($id) => (int) $id)->all();
+        $this->selectedProductIds = $impactAssessment->products()->whereNotNull('product_id')->pluck('product_id')->map(fn ($id) => (int) $id)->all();
+        if ($impactAssessment->products()->whereNull('product_id')->exists()) {
+            $this->bulkSapInput = $impactAssessment->products()->orderBy('id')->pluck('submitted_sap_code')->implode("\n");
+        }
     }
 
     private function authorizeEdit(ImpactAssessment $iar): void
@@ -103,6 +108,8 @@ class EditDraft extends Component
             'due_at' => $this->dueAt,
             'product_ids' => $this->selectedProductIds,
             'bulk_sap_input' => $this->bulkSapInput,
+            'override_warnings' => $this->overrideWarnings,
+            'override_reason' => $this->overrideReason,
         ]);
         session()->flash('success', 'Draft updated successfully.');
         return $this->redirectRoute('iar.show', ['impactAssessment' => $iar->id], navigate: true);

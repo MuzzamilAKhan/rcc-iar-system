@@ -109,7 +109,12 @@ final class IarSubmissionReadiness
             }
         }
 
+        $unresolvedCount = DB::table('iar_products')
+            ->where('impact_assessment_id', $iar->id)
+            ->whereNull('product_id')
+            ->count();
         $globalBlockers = [];
+        if ($unresolvedCount > 0) $globalBlockers[] = $unresolvedCount . ' unresolved SAP code(s) are retained for audit; submission is blocked until country assignment policy is confirmed and data issues are resolved.';
         if ($iar->status !== 'draft') $globalBlockers[] = 'Only draft IARs can be submitted.';
         if ($productIds->isEmpty()) $globalBlockers[] = 'No affected products are linked.';
         if ($rows->isEmpty()) $globalBlockers[] = 'No registered countries were found for the selected products.';
@@ -123,6 +128,7 @@ final class IarSubmissionReadiness
             'country_count' => $rows->count(),
             'ready_count' => $rows->where('ready', true)->count(),
             'registration_issue_count' => $registrationIssues->count(),
+            'unresolved_sap_count' => $unresolvedCount,
             'can_submit' => $globalBlockers === [],
             'blockers' => $globalBlockers,
             'countries' => $rows->values()->all(),

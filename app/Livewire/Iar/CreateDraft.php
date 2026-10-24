@@ -21,6 +21,8 @@ class CreateDraft extends Component
     public array $selectedProductIds = [];
     use WithFileUploads;
 
+    public bool $overrideWarnings = false;
+    public string $overrideReason = '';
     public string $bulkSapInput = '';
     public ?array $bulkSapReport = null;
 
@@ -95,6 +97,8 @@ class CreateDraft extends Component
             'due_at' => $this->dueAt,
             'product_ids' => $this->selectedProductIds,
             'bulk_sap_input' => $this->bulkSapInput,
+            'override_warnings' => $this->overrideWarnings,
+            'override_reason' => $this->overrideReason,
         ]);
 
         session()->flash('success', 'IAR draft created successfully.');

@@ -54,7 +54,7 @@
         </div>
         <section class="rounded-lg border border-blue-200 bg-blue-50 p-4">
             <h3 class="font-semibold">Bulk SAP code validation (Excel paste)</h3>
-            <p class="mt-1 text-sm text-slate-600">Copy a column of SAP codes from Excel, paste below, and preview matches, duplicates and missing codes. Validation shows issues without database changes. On Save, pasted codes take priority over checkboxes; only fully matched lists can be saved. Duplicate pasted lines are automatically deduplicated. Missing or ambiguous SAP codes block saving until resolved.</p>
+            <p class="mt-1 text-sm text-slate-600">Copy a column of SAP codes from Excel, paste below, and preview matches, duplicates and missing codes. Validation shows issues without database changes. On Save, pasted codes take priority over checkboxes; missing SAP codes can be retained in drafts only with an override justification. Ambiguous SAP matches remain blocked. Duplicate lines are deduplicated.</p>
                         <div class="mt-3 rounded border border-blue-200 bg-white p-3">
                 <label class="block text-sm font-semibold">Upload SAP codes from Excel (.xlsx or .csv; maximum 4 MB)</label>
                 <p class="mt-1 text-xs text-slate-600">Use a single SAP-code column, optionally headed SAP Code; or a multi-column file with a SAP Code header. First worksheet only. Maximum 10,000 rows. Uploaded codes replace the pasted list below, not the Product Registry.</p>
@@ -84,6 +84,17 @@
                     @if ($bulkSapReport['matched_preview'])<p class="mt-2 text-green-800"><strong>Matched examples:</strong> {{ implode(', ', array_column($bulkSapReport['matched_preview'], 'code')) }}</p>@endif
                 </div>
             @endif
+            <div class="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm">
+                <label class="flex items-start gap-2 font-semibold text-amber-900">
+                    <input type="checkbox" wire:model="overrideWarnings" class="mt-1">
+                    Retain missing SAP codes as unresolved draft items (override warning)
+                </label>
+                <p class="mt-2 text-amber-900">Only missing SAP codes can be overridden. Ambiguous product matches remain blocked. An override does not authorize IAR submission or country assignment.</p>
+                <label class="mt-3 block font-semibold text-amber-900">Reason for override (mandatory when missing codes exist)</label>
+                <textarea wire:model="overrideReason" rows="3" maxlength="2000" class="mt-2 w-full rounded border border-amber-300 bg-white p-3" placeholder="Explain why the unresolved codes must be retained in this draft..."></textarea>
+                @error('overrideWarnings')<p class="mt-1 text-red-700">{{ $message }}</p>@enderror
+                @error('overrideReason')<p class="mt-1 text-red-700">{{ $message }}</p>@enderror
+            </div>
         </section>
 
         <section class="rounded-lg border p-4">

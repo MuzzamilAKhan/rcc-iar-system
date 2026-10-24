@@ -17,7 +17,7 @@
         </div>
         <section class="rounded border border-blue-200 bg-blue-50 p-4">
             <h3 class="font-semibold">Replace affected products using Excel SAP codes</h3>
-            <p class="mt-1 text-sm text-slate-600">Optional: Paste one SAP code per row. When provided, this list replaces all currently selected products on Save. Missing or ambiguous SAP codes block saving. Leave blank to keep using the checkbox selection below.</p>
+            <p class="mt-1 text-sm text-slate-600">Optional: Paste one SAP code per row. When provided, this list replaces all currently selected products on Save. Missing SAP codes require an override reason; ambiguous SAP matches block saving. Leave blank to keep using the checkbox selection below.</p>
                         <div class="mt-3 rounded border border-blue-200 bg-white p-3">
                 <label class="block text-sm font-semibold">Upload SAP codes from Excel (.xlsx or .csv; maximum 4 MB)</label>
                 <p class="mt-1 text-xs text-slate-600">Use a single SAP-code column, optionally headed SAP Code; or a multi-column file with a SAP Code header. First worksheet only. Maximum 10,000 rows. Uploaded codes replace the pasted list below, not the Product Registry.</p>
@@ -43,6 +43,17 @@
                 @if ($bulkSapReport['missing_preview'])<p class="text-sm text-amber-800">Missing: {{ implode(', ', $bulkSapReport['missing_preview']) }}</p>@endif
                 @if ($bulkSapReport['ambiguous_preview'])<p class="text-sm text-amber-800">Ambiguous: {{ implode(', ', $bulkSapReport['ambiguous_preview']) }}</p>@endif
             @endif
+            <div class="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm">
+                <label class="flex items-start gap-2 font-semibold text-amber-900">
+                    <input type="checkbox" wire:model="overrideWarnings" class="mt-1">
+                    Retain missing SAP codes as unresolved draft items (override warning)
+                </label>
+                <p class="mt-2 text-amber-900">Only missing SAP codes can be overridden. Ambiguous product matches remain blocked. An override does not authorize IAR submission or country assignment.</p>
+                <label class="mt-3 block font-semibold text-amber-900">Reason for override (mandatory when missing codes exist)</label>
+                <textarea wire:model="overrideReason" rows="3" maxlength="2000" class="mt-2 w-full rounded border border-amber-300 bg-white p-3" placeholder="Explain why the unresolved codes must be retained in this draft..."></textarea>
+                @error('overrideWarnings')<p class="mt-1 text-red-700">{{ $message }}</p>@enderror
+                @error('overrideReason')<p class="mt-1 text-red-700">{{ $message }}</p>@enderror
+            </div>
         </section>
         <div class="rounded border p-4">
             <label class="mb-2 block font-semibold">Affected SAP Products (manual selection)</label>

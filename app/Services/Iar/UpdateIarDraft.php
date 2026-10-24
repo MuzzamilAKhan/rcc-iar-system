@@ -25,6 +25,8 @@ class UpdateIarDraft
             'due_at' => ['required', 'date', 'after:now'],
             'product_ids' => ['nullable', 'array', 'max:10000'],
             'bulk_sap_input' => ['nullable', 'string', 'max:1100000'],
+            'override_warnings' => ['nullable', 'boolean'],
+            'override_reason' => ['nullable', 'string', 'max:2000'],
             'product_ids.*' => ['required', 'integer', 'distinct'],
         ])->validate();
 
@@ -36,8 +38,14 @@ class UpdateIarDraft
             }
 
             $bulk = trim((string) ($validated['bulk_sap_input'] ?? ''));
+            $bulkResolution = null;
                     if ($bulk !== '') {
-                        $products = app(ResolveBulkIarProducts::class)->resolve($bulk);
+                        $bulkResolution = app(ResolveSapDraftExceptions::class)->resolve(
+                            $bulk, (bool) ($validated['override_warnings'] ?? false), $validated['override_reason'] ?? null
+                        );
+                        $products = collect($bulkResolution['rows'])->map(fn ($row) => (object) [
+                            'id' => $row['product_id'], 'sap_code' => $row['submitted_sap_code'],
+                        ]);
                     } else {
                         $ids = $validated['product_ids'] ?? [];
                         if (!$ids) {
@@ -66,6 +74,7 @@ class UpdateIarDraft
 
             $old = $iar->only(array_keys($fields));
             $old['product_ids'] = $iar->products()->orderBy('product_id')->pluck('product_id')->map(fn ($id) => (int) $id)->all();
+            $old['submitted_sap_codes'] = $iar->products()->orderBy('id')->pluck('submitted_sap_code')->all();
 
             $iar->update($fields);
             $iar->products()->delete();
@@ -87,11 +96,24 @@ class UpdateIarDraft
                 'entity_id' => $iar->id,
                 'action' => 'iar.draft.updated',
                 'old_values' => json_encode($old, JSON_THROW_ON_ERROR),
-                'new_values' => json_encode($fields + ['product_ids' => $products->pluck('id')->sort()->values()->all()], JSON_THROW_ON_ERROR),
+                'new_values' => json_encode($fields + ['product_ids' => $products->pluck('id')->filter()->sort()->values()->all(),
+                    'submitted_sap_codes' => $products->pluck('sap_code')->all(),
+                    'unresolved_sap_codes' => $bulkResolution['unresolved'] ?? [],
+                    'override_reason' => $bulkResolution['reason'] ?? null], JSON_THROW_ON_ERROR),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
+            if ($bulkResolution && $bulkResolution['unresolved']) {
+                DB::table('audit_logs')->insert([
+                    'actor_user_id' => $actor->id, 'entity_type' => ImpactAssessment::class,
+                    'entity_id' => $iar->id, 'action' => 'iar.sap.override.updated',
+                    'old_values' => json_encode(['submitted_sap_codes' => $old['submitted_sap_codes']], JSON_THROW_ON_ERROR),
+                    'new_values' => json_encode(['unresolved_sap_codes' => $bulkResolution['unresolved'],
+                        'reason' => $bulkResolution['reason'], 'submission_allowed' => false], JSON_THROW_ON_ERROR),
+                    'created_at' => now(), 'updated_at' => now(),
+                ]);
+            }
             return $iar->refresh();
         });
     }

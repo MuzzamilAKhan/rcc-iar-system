@@ -27,12 +27,20 @@ class CreateIarDraft
             'due_at' => ['required', 'date', 'after:now'],
             'product_ids' => ['nullable', 'array', 'max:10000'],
             'bulk_sap_input' => ['nullable', 'string', 'max:1100000'],
+            'override_warnings' => ['nullable', 'boolean'],
+            'override_reason' => ['nullable', 'string', 'max:2000'],
             'product_ids.*' => ['required', 'integer', 'distinct'],
         ])->validate();
 
         $bulk = trim((string) ($validated['bulk_sap_input'] ?? ''));
+        $bulkResolution = null;
                 if ($bulk !== '') {
-                    $products = app(ResolveBulkIarProducts::class)->resolve($bulk);
+                    $bulkResolution = app(ResolveSapDraftExceptions::class)->resolve(
+                        $bulk, (bool) ($validated['override_warnings'] ?? false), $validated['override_reason'] ?? null
+                    );
+                    $products = collect($bulkResolution['rows'])->map(fn ($row) => (object) [
+                        'id' => $row['product_id'], 'sap_code' => $row['submitted_sap_code'],
+                    ]);
                 } else {
                     $ids = $validated['product_ids'] ?? [];
                     if (!$ids) {
@@ -51,7 +59,7 @@ class CreateIarDraft
             throw ValidationException::withMessages(['product_ids' => 'Selected products must have distinct SAP codes within one IAR.']);
         }
 
-        return DB::transaction(function () use ($actor, $validated, $products) {
+        return DB::transaction(function () use ($actor, $validated, $products, $bulkResolution) {
             // Temporary unique number is replaced after the database allocates the unique ID.
             $iar = ImpactAssessment::create([
                 'iar_number' => 'TMP-' . Str::uuid(),
@@ -92,11 +100,23 @@ class CreateIarDraft
                     'ccr_number' => $iar->ccr_number,
                     'product_ids' => $products->pluck('id')->all(),
                     'status' => 'draft',
+                    'unresolved_sap_codes' => $bulkResolution['unresolved'] ?? [],
+                    'override_reason' => $bulkResolution['reason'] ?? null,
                 ], JSON_THROW_ON_ERROR),
                 'created_at' => now(),
                 'updated_at' => now(),
             ]);
 
+            if ($bulkResolution && $bulkResolution['unresolved']) {
+                DB::table('audit_logs')->insert([
+                    'actor_user_id' => $actor->id, 'entity_type' => ImpactAssessment::class,
+                    'entity_id' => $iar->id, 'action' => 'iar.sap.override.created',
+                    'old_values' => null,
+                    'new_values' => json_encode(['unresolved_sap_codes' => $bulkResolution['unresolved'],
+                        'reason' => $bulkResolution['reason'], 'submission_allowed' => false], JSON_THROW_ON_ERROR),
+                    'created_at' => now(), 'updated_at' => now(),
+                ]);
+            }
             return $iar;
         });
     }
