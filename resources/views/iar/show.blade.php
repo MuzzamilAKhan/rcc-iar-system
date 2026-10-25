@@ -33,7 +33,7 @@
                             && auth()->user()->can('iar.create')
                         )
                         <a href="{{ route('iar.edit', $impactAssessment) }}"
-                            class="rounded-lg border border-blue-600 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50">
+                            class="rounded-lg border border-blue-600 px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 ra-iar-edit-action">
                             Edit Draft
                         </a>
                     @endif
@@ -48,7 +48,7 @@
         </div>
         {{-- Success message --}}
         @if (session('success'))
-            <div class="my-5 rounded-lg bg-green-50 p-4 text-green-800">
+            <div class="ra-iar-success-flash my-5 rounded-lg border p-4">
                 {{ session('success') }}
             </div>
         @endif
@@ -58,7 +58,7 @@
                 <h1 class="text-2xl font-bold">
                     {{ $impactAssessment->iar_number }}
                 </h1>
-                <span class="rounded bg-amber-100 px-3 py-1 text-amber-900">
+                <span class="rounded bg-amber-100 px-3 py-1 text-amber-900 ra-iar-status-badge">
                     {{ ucfirst($impactAssessment->status) }}
                 </span>
             </div>
@@ -152,7 +152,7 @@
             </div>
             @if ($impactAssessment->products->contains(fn ($item) => $item->product_id === null))
                 <div class="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-                    Unresolved SAP codes are retained for traceability. This IAR is currently a draft. Use Check Submission Readiness to review eligible countries, SAP exceptions, and any submission blockers before proceeding.
+                    Unresolved SAP codes are retained for traceability. With a documented exception, eligible registered countries can proceed when assignment checks pass.
                 </div>
             @endif
             {{-- Phase 5H.2: read-only exception evidence for authorized IAR viewers. --}}
@@ -173,7 +173,7 @@
             @if ($withoutRegistration->isNotEmpty())
                 <section class="mt-5 rounded-lg border border-amber-300 bg-amber-50 p-4">
                     <h2 class="font-semibold text-amber-900">Missing Country Registration Data</h2>
-                    <p class="mt-1 text-sm text-amber-900">These SAP codes exist in the Product Registry but have no registration records. Submission is blocked until registration data is reviewed and corrected.</p>
+                    <p class="mt-1 text-sm text-amber-900">These SAP codes have no country registration records. They remain visible as exceptions and do not generate country assignments. Other eligible registered countries may proceed.</p>
                     <ul class="mt-2 list-disc pl-5 text-sm text-amber-900">
                         @foreach ($withoutRegistration as $code)<li>{{ $code }}</li>@endforeach
                     </ul>
@@ -202,8 +202,7 @@
                     <p class="text-sm text-slate-500">
                         This IAR is currently a draft. Use
                         <strong>Check Submission Readiness</strong>
-                        to review country assignments and submission blockers
-                        before proceeding.
+                        to review eligible country assignments, SAP exceptions and submission blockers before proceeding.
                     </p>
                 @else
                     <p class="text-sm text-slate-500">
@@ -212,8 +211,7 @@
                     </p>
                 @endif
                 <p class="mt-2 text-xs text-slate-400">
-                    Submission, country assignment creation and notifications
-                    are not yet enabled.
+                    Submission creates eligible country assignments and preserves SAP exceptions in the audit trail. Automated reminder notifications are not enabled yet.
                 </p>
             </div>
         </div>

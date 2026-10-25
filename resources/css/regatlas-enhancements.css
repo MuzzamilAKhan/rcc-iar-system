@@ -68,3 +68,80 @@ body:not(.ra-login) .ra-timezone-banner :is(strong,p){color:var(--ra-fg)}
     min-width: 0;
   }
 }
+
+/* RegAtlas 6A resilient IAR contrast patch */
+/* Scoped to the IAR pages. Independent of Tailwind dark: configuration. */
+body:not(.ra-login) .ra-iar-readiness-status,
+body:not(.ra-login) .ra-iar-readiness-status.ra-iar-blocked {
+    background:#fff1c2!important; color:#704500!important; border:1px solid #e4b955!important;
+}
+body:not(.ra-login) .ra-iar-readiness-status.ra-iar-ready {
+    background:#dcfce7!important; color:#166534!important; border:1px solid #86efac!important;
+}
+body:not(.ra-login) .ra-iar-success-flash {
+    background:#ecfdf5!important; color:#166534!important; border:1px solid #86efac!important;
+}
+/* Works when the page's badge still uses the original Blade class conditional. */
+html[data-ra-theme="dark"] body:not(.ra-login) .ra-iar-readiness-status,
+html[data-ra-theme="dark"] body:not(.ra-login) .ra-iar-readiness-status.ra-iar-blocked {
+    background:#44351c!important; color:#ffe2a3!important; border-color:#9c7840!important;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) .ra-iar-readiness-status.ra-iar-ready {
+    background:#173e36!important; color:#a7f3d0!important; border-color:#397c68!important;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) .ra-iar-success-flash {
+    background:#173e36!important; color:#b1f7d6!important; border-color:#397c68!important;
+}
+/* Additional theme-key compatibility for installations using a body-level dark attribute. */
+body[data-ra-theme="dark"] .ra-iar-readiness-status,
+body.ra-dark .ra-iar-readiness-status {
+    background:#44351c!important; color:#ffe2a3!important; border-color:#9c7840!important;
+}
+body[data-ra-theme="dark"] .ra-iar-success-flash,
+body.ra-dark .ra-iar-success-flash {
+    background:#173e36!important; color:#b1f7d6!important; border-color:#397c68!important;
+}
+
+/* RegAtlas 6A IAR action and status contrast v3 */
+/* Dedicated UI classes avoid generic theme hover overrides. */
+body:not(.ra-login) a.ra-iar-edit-action,
+body:not(.ra-login) a.ra-iar-edit-action:link,
+body:not(.ra-login) a.ra-iar-edit-action:visited {
+  background:transparent!important;
+  color:#08627c!important;
+  border-color:#278fc4!important;
+  text-decoration:none!important;
+}
+body:not(.ra-login) a.ra-iar-edit-action:hover,
+body:not(.ra-login) a.ra-iar-edit-action:focus-visible {
+  background:#e0f4fb!important;
+  color:#084968!important;
+  border-color:#117da3!important;
+  text-decoration:none!important;
+}
+body:not(.ra-login) .ra-iar-status-badge {
+  background:#ffedb5!important;
+  color:#684300!important;
+  border:1px solid #dca942!important;
+  font-weight:700!important;
+  opacity:1!important;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) a.ra-iar-edit-action,
+html[data-ra-theme="dark"] body:not(.ra-login) a.ra-iar-edit-action:link,
+html[data-ra-theme="dark"] body:not(.ra-login) a.ra-iar-edit-action:visited {
+  background:transparent!important;
+  color:#8be4e8!important;
+  border-color:#358cb3!important;
+}
+html[data-ra-theme="dark"] body:not(.ra-login) a.ra-iar-edit-action:hover,
+html[data-ra-theme="dark"] body:not(.ra-login) a.ra-iar-edit-action:focus-visible {
+  background:#23445a!important;
+  color:#ecfeff!important;
+  border-color:#4ac0cd!important;
+  box-shadow:0 0 0 2px rgba(74,192,205,.16);
+}
+html[data-ra-theme="dark"] body:not(.ra-login) .ra-iar-status-badge {
+  background:#42351c!important;
+  color:#ffe2a3!important;
+  border-color:#a8823e!important;
+}

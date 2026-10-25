@@ -21,7 +21,7 @@
                 <h1 class="text-2xl font-bold">Submission Readiness</h1>
                 <p class="mt-1 text-slate-600">{{ $report['iar_number'] }} &middot; Submission validation</p>
             </div>
-            <span class="rounded px-3 py-1 text-sm {{ $report['can_submit'] ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
+            <span class="ra-iar-readiness-status rounded px-3 py-1 text-sm {{ $report['can_submit'] ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
                 {{ $report['can_submit'] ? 'Ready to submit' : 'Blocked' }}
             </span>
         </div>
