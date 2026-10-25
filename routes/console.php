@@ -47,3 +47,30 @@ Artisan::command('iar:reminders-stage {--date= : UTC evaluation time}', function
     $this->comment('No email sent. No scheduler configured.');
     return 0;
 })->purpose('Explicitly stage deduplicated in-app IAR reminders; no email');
+
+
+// Phase 6B.3: read-only email content preview. No SMTP, jobs or inserts.
+\Illuminate\Support\Facades\Artisan::command('iar:reminders-email-preview {--date=}', function (
+    \App\Services\Iar\ReminderPreview $preview,
+    \App\Services\Iar\ReminderEmailPreview $formatter
+) {
+    try {
+        $at = $this->option('date')
+            ? \Carbon\CarbonImmutable::parse($this->option('date'))->utc()
+            : \Carbon\CarbonImmutable::now('UTC');
+    } catch (\Throwable $e) {
+        $this->error('Invalid --date timestamp. Use ISO 8601 with timezone.');
+        return 1;
+    }
+    $messages = $formatter->messages($preview->due($at));
+    $this->info('EMAIL CONTENT PREVIEW ONLY at ' . $at->toIso8601String());
+    $this->line('Messages eligible: ' . count($messages));
+    foreach ($messages as $message) {
+        $this->line('---- IAR ID ' . $message['iar_id'] . ' | cycle ' . $message['cycle']
+            . ' | recipient user ID ' . $message['recipient_user_id'] . ' | ' . $message['role']);
+        $this->line('Subject: ' . $message['subject']);
+        $this->line($message['body']);
+    }
+    $this->warn('No email sent. No records created. No scheduler enabled.');
+})->purpose('Preview recipient-scoped IAR reminder email content without sending');
+

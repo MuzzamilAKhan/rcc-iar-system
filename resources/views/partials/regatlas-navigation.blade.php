@@ -29,6 +29,17 @@
   <button type="button" class="ra-menu-toggle" id="ra-menu-toggle" aria-controls="ra-sidebar" aria-expanded="false" aria-label="Toggle menu">☰</button>
   <div class="ra-workspace-context"><strong>RegAtlas</strong><span>Regulatory intelligence workspace</span></div>
   <div class="ra-workspace-tools">
+    {{-- Phase 6B.3: personal staged reminder RECORD count (not unread). --}}
+    @php
+      $raReminderCount = \Illuminate\Support\Facades\DB::table('notification_logs')
+        ->where('recipient_user_id', auth()->id())
+        ->whereIn('event_type', ['iar.reminder.creator','iar.reminder.assessor'])
+        ->count();
+    @endphp
+    <a href="{{ route('iar.reminders') }}" class="ra-reminder-bell" @if(request()->routeIs('iar.reminders')) aria-current="page" @endif aria-label="My IAR reminders, {{ $raReminderCount }} records" title="My IAR reminders">
+      <span aria-hidden="true">♧</span><span class="ra-reminder-bell-label">Reminders</span>
+      @if($raReminderCount > 0)<span class="ra-reminder-bubble">{{ $raReminderCount > 99 ? '99+' : $raReminderCount }}</span>@endif
+    </a>
     <span class="ra-user-id" title="Signed-in account">{{ auth()->user()->name }}</span>
     <button type="button" class="ra-theme-toggle" id="ra-theme-toggle" aria-label="Switch to dark mode" aria-pressed="false" title="Toggle light or dark appearance"><span id="ra-theme-icon" aria-hidden="true">☾</span><span id="ra-theme-label">Dark mode</span></button>
   </div>
