@@ -72,7 +72,7 @@
                 @endunless
             </form>
         @endif
-        <p class="mt-6 text-sm text-slate-500">Submission creates country assignments and locks draft editing. No emails, notifications or account activations are triggered.</p>
+        <p class="mt-6 text-sm text-slate-500">Submission creates country assignments only for eligible registered countries and locks draft editing. SAP exceptions remain recorded in the audit trail. Products with no registered countries do not generate assignments. Reminder notifications are not included in this release yet.</p>
     </div>
 </main>
 </body>

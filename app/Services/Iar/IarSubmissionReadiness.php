@@ -109,6 +109,11 @@ final class IarSubmissionReadiness
             }
         }
 
+        $unresolvedCodes = DB::table('iar_products')
+            ->where('impact_assessment_id', $iar->id)
+            ->whereNull('product_id')
+            ->orderBy('submitted_sap_code')
+            ->pluck('submitted_sap_code')->all();
         $unresolvedCount = DB::table('iar_products')
             ->where('impact_assessment_id', $iar->id)
             ->whereNull('product_id')
@@ -120,11 +125,34 @@ final class IarSubmissionReadiness
             ->whereNotIn('id', DB::table('product_registrations')->select('product_id'))
             ->orderBy('sap_code')->pluck('sap_code')->all();
         $globalBlockers = [];
-        if ($unresolvedCount > 0) $globalBlockers[] = $unresolvedCount . ' unresolved SAP code(s) are retained for audit; submission is blocked until country assignment policy is confirmed and data issues are resolved.';
+        // An exception is accepted only if the latest recorded justification covers the
+        // precise unresolved SAP set currently present on the IAR. Previous reasons do
+        // not silently authorize a later, different set of codes.
+        $exceptionReason = null;
+        if ($unresolvedCount > 0) {
+            $record = DB::table('audit_logs')
+                ->where('entity_type', ImpactAssessment::class)
+                ->where('entity_id', $iar->id)
+                ->whereIn('action', ['iar.sap.override.created', 'iar.sap.override.updated'])
+                ->orderByDesc('id')->first();
+            $payload = $record ? json_decode((string) $record->new_values, true) : null;
+            $savedCodes = $payload['unresolved_sap_codes'] ?? [];
+            if (!is_array($savedCodes)) $savedCodes = [];
+            sort($savedCodes);
+            $currentCodes = $unresolvedCodes;
+            sort($currentCodes);
+            if (is_array($payload) && is_array($savedCodes)
+                && $savedCodes === $currentCodes
+                && mb_strlen(trim((string) ($payload['reason'] ?? ''))) >= 15) {
+                $exceptionReason = trim((string) $payload['reason']);
+            } else {
+                $globalBlockers[] = 'Unresolved SAP codes require a current, recorded exception justification before submission.';
+            }
+        }
         if ($iar->status !== 'draft') $globalBlockers[] = 'Only draft IARs can be submitted.';
         if ($productIds->isEmpty()) $globalBlockers[] = 'No affected products are linked.';
         if ($rows->isEmpty()) $globalBlockers[] = 'No registered countries were found for the selected products.';
-        if ($unregisteredProductCount > 0) $globalBlockers[] = 'One or more selected products have no country registration.';
+        // Unregistered products are retained as exceptions; registered products proceed.
         if ($registrationIssues->isNotEmpty()) $globalBlockers[] = 'One or more product registrations have unknown status or country.';
         if ($rows->contains(fn ($row) => !$row['ready'])) $globalBlockers[] = 'At least one country has an assignment blocker.';
 
@@ -135,6 +163,8 @@ final class IarSubmissionReadiness
             'ready_count' => $rows->where('ready', true)->count(),
             'registration_issue_count' => $registrationIssues->count(),
             'unresolved_sap_count' => $unresolvedCount,
+            'unresolved_sap_codes' => $unresolvedCodes,
+            'exception_reason' => $exceptionReason,
             'unregistered_sap_codes' => $unregisteredCodes,
             'unregistered_product_count' => $unregisteredProductCount,
             'can_submit' => $globalBlockers === [],

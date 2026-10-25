@@ -52,6 +52,33 @@ final class SubmitIar
                 ]);
             }
 
+            // Keep excluded SAP codes in structured exception history. This does not
+            // invent a country assignment for products with no registrations.
+            foreach ($report['unresolved_sap_codes'] as $code) {
+                DB::table('assignment_exceptions')->insert([
+                    'impact_assessment_id' => $locked->id,
+                    'sap_code' => $code,
+                    'country_id' => null,
+                    'exception_type' => 'unresolved_sap',
+                    'resolution_status' => 'open',
+                    'details' => $report['exception_reason'],
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+            foreach ($report['unregistered_sap_codes'] as $code) {
+                DB::table('assignment_exceptions')->insert([
+                    'impact_assessment_id' => $locked->id,
+                    'sap_code' => $code,
+                    'country_id' => null,
+                    'exception_type' => 'no_country_registration',
+                    'resolution_status' => 'open',
+                    'details' => 'No country registration recorded at submission.',
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ]);
+            }
+
             $locked->update(['status' => 'submitted', 'submitted_at' => $now]);
 
             DB::table('audit_logs')->insert([
@@ -63,6 +90,9 @@ final class SubmitIar
                 'new_values' => json_encode([
                     'status' => 'submitted',
                     'submitted_at' => $now->toDateTimeString(),
+                    'unresolved_sap_codes' => $report['unresolved_sap_codes'],
+                    'unregistered_sap_codes' => $report['unregistered_sap_codes'],
+                    'exception_reason' => $report['exception_reason'],
                     'assignments' => collect($report['countries'])->map(fn ($c) => [
                         'country_id' => $c['country_id'],
                         'assigned_to_user_id' => $c['assignee_id'],

@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-    
+
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
@@ -152,7 +152,7 @@
             </div>
             @if ($impactAssessment->products->contains(fn ($item) => $item->product_id === null))
                 <div class="mt-4 rounded border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
-                    Unresolved SAP codes are retained for traceability. Submission remains blocked until applicable country assignment and registration issues are resolved.
+                    Unresolved SAP codes are retained for traceability. This IAR is currently a draft. Use Check Submission Readiness to review eligible countries, SAP exceptions, and any submission blockers before proceeding.
                 </div>
             @endif
             {{-- Phase 5H.2: read-only exception evidence for authorized IAR viewers. --}}

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    
+
     <link rel="icon" type="image/svg+xml" href="{{ asset('favicon.svg') }}">
     <link rel="alternate icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
@@ -30,6 +30,19 @@
             <div class="rounded-lg bg-slate-50 p-4"><div class="text-2xl font-bold">{{ $report['country_count'] }}</div><div class="text-sm text-slate-600">Countries</div></div>
             <div class="rounded-lg bg-slate-50 p-4"><div class="text-2xl font-bold">{{ $report['ready_count'] }}</div><div class="text-sm text-slate-600">Countries ready</div></div>
         </div>
+        @if ($report['unresolved_sap_count'] > 0 || $report['unregistered_product_count'] > 0)
+            <section class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950" aria-label="SAP submission exceptions">
+                <h2 class="font-semibold">SAP exceptions retained with this IAR</h2>
+                <p class="mt-1 text-sm">Eligible registered countries can continue. The items below will not generate country assignments.</p>
+                @if ($report['unresolved_sap_count'] > 0)
+                    <p class="mt-3 text-sm"><strong>Unresolved SAP codes:</strong> {{ implode(', ', $report['unresolved_sap_codes']) }}</p>
+                    <p class="mt-1 text-sm"><strong>Recorded exception justification:</strong> {{ $report['exception_reason'] ?: 'Missing or outdated justification — submission blocked.' }}</p>
+                @endif
+                @if ($report['unregistered_product_count'] > 0)
+                    <p class="mt-3 text-sm"><strong>Products with no country registrations:</strong> {{ implode(', ', $report['unregistered_sap_codes']) }}</p>
+                @endif
+            </section>
+        @endif
         @if ($report['blockers'])
             <div class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-4">
                 <h2 class="font-semibold">Submission blockers</h2>
@@ -78,7 +91,7 @@
                 @endunless
             </form>
         @endif
-        <p class="mt-6 text-sm text-slate-500">Submission creates country assignments and locks draft editing. No emails, notifications or account activations are triggered.</p>
+        <p class="mt-6 text-sm text-slate-500">Submission creates country assignments only for eligible registered countries and locks draft editing. SAP exceptions remain recorded in the audit trail. Products with no registered countries do not generate assignments. Reminder notifications are not included in this release yet.</p>
     </div>
 </main>
 </body>
