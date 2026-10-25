@@ -30,3 +30,20 @@ Artisan::command('iar:reminders-preview {--date= : UTC time such as 2026-10-15T0
     return 0;
 })->purpose('Preview IAR reminders without creating or sending notifications');
 
+
+// Phase 6B.2: explicitly opt-in local in-app staging, no email or scheduler.
+Artisan::command('iar:reminders-stage {--date= : UTC evaluation time}', function (\App\Services\Iar\ReminderStager $stager) {
+    $input = $this->option('date');
+    try {
+        $asOf = $input ? \Carbon\CarbonImmutable::parse($input, 'UTC') : \Carbon\CarbonImmutable::now('UTC');
+    } catch (\Throwable $e) {
+        $this->error('Invalid date: ' . $e->getMessage());
+        return 1;
+    }
+    // Safety: simulated future dates may unintentionally stage notifications against real records.
+    // This is intentionally an opt-in admin/developer CLI command. Do not schedule it.
+    $counts = $stager->stage($asOf);
+    $this->info('IN-APP ONLY: created ' . $counts['created'] . ', existing ' . $counts['existing'] . ', skipped ' . $counts['skipped']);
+    $this->comment('No email sent. No scheduler configured.');
+    return 0;
+})->purpose('Explicitly stage deduplicated in-app IAR reminders; no email');

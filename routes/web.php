@@ -106,3 +106,14 @@ Route::middleware(['auth', 'active', 'can:manage-master-data'])->group(function 
     Route::get('/admin/products/import/requests/{id}', [\App\Http\Controllers\RegistryImportApprovalController::class, 'show'])->name('admin.products.import.requests.show');
     Route::post('/admin/products/import/requests/{id}/decision', [\App\Http\Controllers\RegistryImportApprovalController::class, 'decide'])->name('admin.products.import.requests.decide');
 });
+
+// Phase 6B.2: user-scoped in-app reminder history (read only).
+Route::middleware(['auth', 'active'])->get('/my/iar-reminders', function () {
+    $reminders = \Illuminate\Support\Facades\DB::table('notification_logs as n')
+        ->join('impact_assessments as i', 'i.id', '=', 'n.impact_assessment_id')
+        ->where('n.recipient_user_id', auth()->id())
+        ->whereIn('n.event_type', ['iar.reminder.creator', 'iar.reminder.assessor'])
+        ->select('n.*', 'i.iar_number')
+        ->orderByDesc('n.id')->paginate(15);
+    return view('iar.reminders', compact('reminders'));
+})->name('iar.reminders');
