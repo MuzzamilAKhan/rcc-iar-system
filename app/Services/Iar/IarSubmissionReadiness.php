@@ -102,6 +102,18 @@ final class IarSubmissionReadiness
                         'strategy' => $strategy,
                         'assignee' => $assignee,
                         'assignee_id' => $assigneeId,
+                        // Only assessor mapping/eligibility issues can be deferred.
+                        // Inactive countries/regions and unknown strategies remain hard blockers.
+                        'defer_assessor' => $strategy === 'country_assessor'
+                            && $country->country_active && $country->region_active
+                            && count($blockers) > 0
+                            && collect($blockers)->every(fn ($reason) => in_array($reason, [
+                                'Primary country assessor mapping is missing.',
+                                'Primary assessor mapping is inactive.',
+                                'Primary assessor account is inactive.',
+                                'Primary assessor lacks Local RA role.',
+                                'Primary assessor provisioning is not approved.',
+                            ], true)),
                         'ready' => count($blockers) === 0,
                         'blockers' => $blockers,
                     ];
@@ -154,13 +166,17 @@ final class IarSubmissionReadiness
         if ($rows->isEmpty()) $globalBlockers[] = 'No registered countries were found for the selected products.';
         // Unregistered products are retained as exceptions; registered products proceed.
         if ($registrationIssues->isNotEmpty()) $globalBlockers[] = 'One or more product registrations have unknown status or country.';
-        if ($rows->contains(fn ($row) => !$row['ready'])) $globalBlockers[] = 'At least one country has an assignment blocker.';
+        if ($rows->where('ready', true)->isEmpty()) $globalBlockers[] = 'No eligible country assessor is ready; IAR must remain a draft.';
+        if ($rows->contains(fn ($row) => !$row['ready'] && !$row['defer_assessor'])) {
+            $globalBlockers[] = 'At least one country has a non-deferable assignment blocker.';
+        }
 
         return [
             'iar_number' => $iar->iar_number,
             'product_count' => $productIds->count(),
             'country_count' => $rows->count(),
             'ready_count' => $rows->where('ready', true)->count(),
+            'deferred_count' => $rows->where('defer_assessor', true)->count(),
             'registration_issue_count' => $registrationIssues->count(),
             'unresolved_sap_count' => $unresolvedCount,
             'unresolved_sap_codes' => $unresolvedCodes,

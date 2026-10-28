@@ -36,8 +36,24 @@ final class SubmitIar
 
             $now = now();
             foreach ($report['countries'] as $country) {
-                if (!$country['ready'] || empty($country['assignee_id'])) {
-                    throw ValidationException::withMessages(['submission' => 'A country assignment could not be resolved.']);
+                if (!$country['ready']) {
+                    if (empty($country['defer_assessor'])) {
+                        throw ValidationException::withMessages(['submission' => 'A non-deferable country assignment blocker was detected.']);
+                    }
+                    DB::table('assignment_exceptions')->insert([
+                        'impact_assessment_id' => $locked->id,
+                        'sap_code' => null,
+                        'country_id' => $country['country_id'],
+                        'exception_type' => 'assessor_unavailable',
+                        'resolution_status' => 'open',
+                        'details' => implode(' ', $country['blockers']),
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ]);
+                    continue;
+                }
+                if (empty($country['assignee_id'])) {
+                    throw ValidationException::withMessages(['submission' => 'Ready country is missing its assignee.']);
                 }
                 DB::table('iar_assignments')->insert([
                     'impact_assessment_id' => $locked->id,
@@ -93,11 +109,16 @@ final class SubmitIar
                     'unresolved_sap_codes' => $report['unresolved_sap_codes'],
                     'unregistered_sap_codes' => $report['unregistered_sap_codes'],
                     'exception_reason' => $report['exception_reason'],
-                    'assignments' => collect($report['countries'])->map(fn ($c) => [
+                    'assignments' => collect($report['countries'])->where('ready', true)->map(fn ($c) => [
                         'country_id' => $c['country_id'],
                         'assigned_to_user_id' => $c['assignee_id'],
                         'assignment_source' => $c['strategy'],
-                    ])->all(),
+                    ])->values()->all(),
+                    'deferred_countries' => collect($report['countries'])->filter(fn ($c) => $c['defer_assessor'] ?? false)->map(fn ($c) => [
+                        'country_id' => $c['country_id'],
+                        'country' => $c['country'],
+                        'blockers' => $c['blockers'],
+                    ])->values()->all(),
                 ], JSON_THROW_ON_ERROR),
                 'created_at' => $now,
                 'updated_at' => $now,

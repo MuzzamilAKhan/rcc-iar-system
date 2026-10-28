@@ -22,7 +22,7 @@
                 <p class="mt-1 text-slate-600">{{ $report['iar_number'] }} &middot; Submission validation</p>
             </div>
             <span class="ra-iar-readiness-status rounded px-3 py-1 text-sm {{ $report['can_submit'] ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800' }}">
-                {{ $report['can_submit'] ? 'Ready to submit' : 'Blocked' }}
+                {{ $report['can_submit'] ? ($report['deferred_count'] > 0 ? 'Ready with deferred countries' : 'Ready to submit') : 'Blocked' }}
             </span>
         </div>
         <div class="mt-6 grid gap-4 sm:grid-cols-3">
@@ -30,6 +30,12 @@
             <div class="rounded-lg bg-slate-50 p-4"><div class="text-2xl font-bold">{{ $report['country_count'] }}</div><div class="text-sm text-slate-600">Countries</div></div>
             <div class="rounded-lg bg-slate-50 p-4"><div class="text-2xl font-bold">{{ $report['ready_count'] }}</div><div class="text-sm text-slate-600">Countries ready</div></div>
         </div>
+        @if ($report['deferred_count'] > 0)
+            <section class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950" aria-label="Pending country assignments">
+                <h2 class="font-semibold">{{ $report['deferred_count'] }} country assignment(s) pending assessor mapping</h2>
+                <p class="mt-1 text-sm">Eligible countries can proceed. Unassigned countries are retained as auditable open exceptions and must be mapped later. The original IAR deadline is not reset.</p>
+            </section>
+        @endif
         @if ($report['unresolved_sap_count'] > 0 || $report['unregistered_product_count'] > 0)
             <section class="mt-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-amber-950" aria-label="SAP submission exceptions">
                 <h2 class="font-semibold">SAP exceptions retained with this IAR</h2>
@@ -62,6 +68,7 @@
                         <td class="p-3">{{ $country['assignee'] ?? 'Not available' }}</td>
                         <td class="p-3">
                             @if ($country['ready'])<span class="font-medium text-green-700">Ready</span>
+                            @elseif($country['defer_assessor'])<strong class="text-amber-800">Pending assessor assignment</strong><ul class="list-disc pl-4 text-amber-800">@foreach ($country['blockers'] as $reason)<li>{{ $reason }}</li>@endforeach</ul>
                             @else <ul class="list-disc pl-4 text-amber-800">@foreach ($country['blockers'] as $reason)<li>{{ $reason }}</li>@endforeach</ul>@endif
                         </td>
                     </tr>
@@ -83,7 +90,7 @@
                 <button type="submit" @disabled(!$report['can_submit'])
                     style="{{ $report['can_submit'] ? 'background-color:#047857;color:white;' : 'background-color:#cbd5e1;color:#475569;' }}"
                     class="rounded-lg px-5 py-3 font-semibold disabled:cursor-not-allowed"
-                    onclick="return confirm('Submit this IAR and assign every listed country? This action cannot be undone here.');">
+                    onclick="return confirm('Submit this IAR, assign eligible countries and record unavailable assessors as pending exceptions? This action cannot be undone here.');">
                     Submit IAR &amp; Create Assignments
                 </button>
                 @unless($report['can_submit'])
@@ -91,7 +98,7 @@
                 @endunless
             </form>
         @endif
-        <p class="mt-6 text-sm text-slate-500">Submission creates country assignments only for eligible registered countries and locks draft editing. SAP exceptions remain recorded in the audit trail. Products with no registered countries do not generate assignments. Reminder notifications are not included in this release yet.</p>
+        <p class="mt-6 text-sm text-slate-500">Submission creates assignments for eligible countries while preserving missing assessor mappings as open country exceptions, and locks draft editing. SAP exceptions remain recorded in the audit trail. Products with no registered countries do not generate assignments. Reminder notifications are not included in this release yet.</p>
     </div>
 </main>
 </body>
