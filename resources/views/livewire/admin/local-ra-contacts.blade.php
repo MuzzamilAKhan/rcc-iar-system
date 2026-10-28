@@ -14,6 +14,10 @@
             </p>
         </div>
 
+        @role('super-admin')
+        <a href="{{ route('admin.primary-mapping.index') }}" class="ra-primary-mapping-action mb-5 inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold shadow-sm transition hover:opacity-90" style="background-color:#0f766e;color:#ffffff;text-decoration:none;border:1px solid #115e59;min-height:42px;">Manage primary assessor mappings</a>
+        @endrole
+
         <div class="bg-white rounded-xl shadow-sm p-6">
 
             <input type="search" wire:model.live.debounce.400ms="search"
