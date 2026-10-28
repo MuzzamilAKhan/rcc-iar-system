@@ -196,6 +196,15 @@
                     @endforeach
                 </section>
             @endif
+            {{-- Phase 6C.2: explicitly authorized pending-country resolution. --}}
+            @if ($impactAssessment->status === 'submitted' && (auth()->user()->hasRole('super-admin') || ($impactAssessment->creator_id === auth()->id() && auth()->user()->can('iar.create'))))
+                @php $raPendingCount = \Illuminate\Support\Facades\DB::table('assignment_exceptions')->where('impact_assessment_id', $impactAssessment->id)->where('exception_type', 'assessor_unavailable')->where('resolution_status', 'open')->count(); @endphp
+                <section class="mt-5 rounded-lg border border-amber-300 p-4">
+                    <h2 class="font-semibold">Pending country assignments: {{ $raPendingCount }}</h2>
+                    <p class="mt-2 text-sm">Track countries awaiting eligible primary assessors without delaying already assigned countries.</p>
+                    <a class="mt-3 inline-block font-semibold text-blue-700" href="{{ route('iar.deferred.index', $impactAssessment) }}">Review / Resolve pending countries &rarr;</a>
+                </section>
+            @endif
             {{-- Workflow information --}}
             <div class="mt-6 border-t border-slate-200 pt-5">
                 @if ($impactAssessment->status === 'draft')

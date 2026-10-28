@@ -117,3 +117,17 @@ Route::middleware(['auth', 'active'])->get('/my/iar-reminders', function () {
         ->orderByDesc('n.id')->paginate(15);
     return view('iar.reminders', compact('reminders'));
 })->name('iar.reminders');
+
+// Phase 6C.2: explicitly resolve audited pending country assignment using approved primary Local RA mapping.
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/iars/{impactAssessment}/deferred-countries', [\App\Http\Controllers\DeferredCountryController::class, 'index'])->name('iar.deferred.index');
+    Route::post('/iars/{impactAssessment}/deferred-countries/{exceptionId}/resolve', [\App\Http\Controllers\DeferredCountryController::class, 'resolve'])->name('iar.deferred.resolve');
+});
+
+// Phase 6C.2A: Super Admin primary mapping management; synthetic demo activation only in local env.
+Route::middleware(['auth','active','role:super-admin'])->group(function () {
+    Route::get('/admin/local-ra/primary-mapping', [\App\Http\Controllers\CountryPrimaryMappingController::class,'index'])->name('admin.primary-mapping.index');
+    Route::post('/admin/local-ra/primary-mapping', [\App\Http\Controllers\CountryPrimaryMappingController::class,'store'])->name('admin.primary-mapping.store');
+    Route::post('/admin/local-ra/primary-mapping/synthetic-activation', [\App\Http\Controllers\CountryPrimaryMappingController::class,'activateSynthetic'])->name('admin.primary-mapping.demo-activate');
+});
+
