@@ -10,6 +10,7 @@
     @if(auth()->user()->can('iar.view.own') || auth()->user()->can('iar.view.all') || auth()->user()->can('iar.view.assigned'))
       <a href="{{ route('iar.index') }}" @if(request()->routeIs('iar.index') || request()->routeIs('iar.edit') || request()->routeIs('iar.show') || request()->routeIs('iar.readiness')) aria-current="page" @endif><span aria-hidden="true">▤</span> Impact assessments</a>
     @endif
+    <a href="{{ route('ccr.sme-drafts.index') }}" @if(request()->routeIs('ccr.sme-drafts.*')) aria-current="page" @endif><span aria-hidden="true">✎</span> My CCR assessments</a>
     @can('assessment.edit.assigned')<a href="{{ route('assessment.index') }}" @if(request()->routeIs('assessment.*')) aria-current="page" @endif><span aria-hidden="true">✓</span> My assessments</a>@endcan
     @can('manage-master-data')
       <a href="{{ route('admin.master-data') }}" @if(request()->routeIs('admin.master-data')) aria-current="page" @endif><span aria-hidden="true">▣</span> Master data</a>

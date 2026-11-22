@@ -15,6 +15,7 @@
 <p class="mt-2 text-sm"><strong>Starter question:</strong> {{ $questions[$code] ?? 'Review the proposed change and provide an area-specific assessment.' }}</p>
 @if($assignment)
 <p class="mt-3 text-sm"><strong>Assigned SME:</strong> {{ $assignment->assessor_name }} · Status: {{ $assignment->status }}</p>
+@if((int) $assignment->assigned_to_user_id === (int) auth()->id())<a class="mt-2 inline-block rounded-lg px-4 py-2 font-semibold" style="background:#0f8b8d!important;color:#fff!important" href="{{ route('ccr.sme-drafts.edit', $assignment->id) }}">Open SME draft</a>@endif
 @else
 <form method="POST" action="{{ route('ccr.sme.store', $record->id) }}" class="mt-4 flex flex-wrap items-end gap-3">@csrf
 <input type="hidden" name="area_code" value="{{ $code }}">

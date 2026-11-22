@@ -159,3 +159,10 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/change-controls/{id}/sme-assignments', [\App\Http\Controllers\CcrSmeAssignmentController::class, 'index'])->whereNumber('id')->name('ccr.sme.index');
     Route::post('/change-controls/{id}/sme-assignments', [\App\Http\Controllers\CcrSmeAssignmentController::class, 'store'])->whereNumber('id')->name('ccr.sme.store');
 });
+
+// Phase CCR3B: assignee-scoped SME draft responses, no submission/approval.
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/my/ccr-assessments', [\App\Http\Controllers\CcrSmeDraftController::class, 'index'])->name('ccr.sme-drafts.index');
+    Route::get('/ccr-sme-assignments/{assignmentId}/draft', [\App\Http\Controllers\CcrSmeDraftController::class, 'edit'])->whereNumber('assignmentId')->name('ccr.sme-drafts.edit');
+    Route::post('/ccr-sme-assignments/{assignmentId}/draft', [\App\Http\Controllers\CcrSmeDraftController::class, 'save'])->whereNumber('assignmentId')->name('ccr.sme-drafts.save');
+});
