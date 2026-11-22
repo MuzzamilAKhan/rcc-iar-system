@@ -31,7 +31,8 @@
                     Select cross-functional impact areas
                 </a>
             </div>
-            <p class="mt-5 text-sm text-slate-500">Next release: select impact areas and assign SME assessments. AI,
+            <div class="mt-4"><a href="{{ route('ccr.sme.index', $record->id) }}" class="inline-block rounded-lg px-5 py-3 font-semibold shadow-sm" style="background-color:#0f8b8d!important;color:white!important;text-decoration:none">Assign SME assessments</a></div>
+            <p class="mt-5 text-sm text-slate-500">Starter SME assignments are now available. Detailed assessment responses, AI,
                 approval, implementation and closure not enabled yet.</p>
         </section>
     </main>

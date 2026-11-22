@@ -153,3 +153,9 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/change-controls/{id}/impact-areas', [\App\Http\Controllers\CcrImpactController::class, 'edit'])->whereNumber('id')->name('ccr.impacts.edit');
     Route::post('/change-controls/{id}/impact-areas', [\App\Http\Controllers\CcrImpactController::class, 'update'])->whereNumber('id')->name('ccr.impacts.update');
 });
+
+// Phase CCR3A: selected-area SME assignment only; no automated emails or assessment submissions.
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/change-controls/{id}/sme-assignments', [\App\Http\Controllers\CcrSmeAssignmentController::class, 'index'])->whereNumber('id')->name('ccr.sme.index');
+    Route::post('/change-controls/{id}/sme-assignments', [\App\Http\Controllers\CcrSmeAssignmentController::class, 'store'])->whereNumber('id')->name('ccr.sme.store');
+});

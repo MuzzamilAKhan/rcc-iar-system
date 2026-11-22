@@ -56,8 +56,14 @@ final class CcrImpactController
             }
         })->validate();
         DB::transaction(function () use ($request, $id, $validated, $areas, $suggested) {
+            $locked = DB::table('change_control_records')->where('id', $id)->lockForUpdate()->first();
+            abort_unless($locked && $locked->status === 'draft', 409);
+            $assignedAreas = DB::table('ccr_sme_assignments')->where('change_control_record_id', $id)->pluck('area_code')->all();
+            foreach ($assignedAreas as $assignedArea) {
+                abort_unless(($validated['decisions'][$assignedArea] ?? null) === 'selected', 409, 'Cannot exclude an area with an SME assignment.');
+            }
+
             // Serialize edits to the same CCR; do not change the CCR lifecycle state.
-            DB::table('change_control_records')->where('id', $id)->lockForUpdate()->first();
             $now = now('UTC');
             foreach ($areas as $code => $label) {
                 $decision = $validated['decisions'][$code];
