@@ -160,6 +160,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/change-controls/{id}/sme-assignments', [\App\Http\Controllers\CcrSmeAssignmentController::class, 'store'])->whereNumber('id')->name('ccr.sme.store');
 });
 
+// Phase CCR3C: controlled SME submission and independent human assessment review.
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::post('/ccr-sme-assignments/{assignmentId}/submit', [\App\Http\Controllers\CcrSmeReviewController::class, 'submit'])->whereNumber('assignmentId')->name('ccr.sme-reviews.submit');
+    Route::get('/ccr-sme-reviews', [\App\Http\Controllers\CcrSmeReviewController::class, 'index'])->name('ccr.sme-reviews.index');
+    Route::get('/ccr-sme-reviews/{assignmentId}', [\App\Http\Controllers\CcrSmeReviewController::class, 'show'])->whereNumber('assignmentId')->name('ccr.sme-reviews.show');
+    Route::post('/ccr-sme-reviews/{assignmentId}/decision', [\App\Http\Controllers\CcrSmeReviewController::class, 'decide'])->whereNumber('assignmentId')->name('ccr.sme-reviews.decide');
+});
+
 // Phase CCR3B: assignee-scoped SME draft responses, no submission/approval.
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/my/ccr-assessments', [\App\Http\Controllers\CcrSmeDraftController::class, 'index'])->name('ccr.sme-drafts.index');

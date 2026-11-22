@@ -58,6 +58,7 @@ final class CcrSmeDraftController
     {
         [$assignment] = $this->authorized($request, $assignmentId);
         abort_unless($assignment->ccr_status === 'draft', 409, 'CCR is locked for draft edits.');
+        abort_unless(in_array($assignment->status, ['assigned','draft','returned'], true), 409, 'Submitted/reviewed assessment is locked.');
         $input = Validator::make($request->all(), [
             'answer' => ['required', Rule::in(['yes', 'no', 'uncertain'])],
             'impact_conclusion' => ['required', Rule::in(['potential_impact', 'no_impact', 'further_assessment'])],
@@ -70,6 +71,7 @@ final class CcrSmeDraftController
             abort_unless($current && (int) $current->assigned_to_user_id === (int) $request->user()->id, 403);
             $ccr = DB::table('change_control_records')->where('id', $assignment->change_control_record_id)->first();
             abort_unless($ccr && $ccr->status === 'draft', 409, 'CCR is locked.');
+            abort_unless(in_array($current->status, ['assigned', 'draft', 'returned'], true), 409, 'Submitted/reviewed assessment is locked.');
             abort_unless(DB::table('ccr_impact_decisions')->where('change_control_record_id', $ccr->id)
                 ->where('area_code', $current->area_code)->where('decision', 'selected')->exists(), 409);
             $old = DB::table('ccr_sme_responses')->where('ccr_sme_assignment_id', $assignmentId)->first();

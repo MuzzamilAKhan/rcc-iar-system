@@ -4,7 +4,7 @@
 <main class="mx-auto max-w-5xl p-6">
 <a href="{{ route('ccr.show', $record->id) }}" style="color:var(--ra-accent)">&larr; {{ $record->ccr_number }}</a>
 <h1 class="mt-5 text-2xl font-bold">SME assessment assignments</h1>
-<p class="mt-2 text-sm text-slate-600">Assign a qualified active RA user to each selected area. Starter screening questions are reference prompts only; detailed answers and human review arrive in CCR3B. No emails are sent.</p>
+<p class="mt-2 text-sm text-slate-600">Assign a qualified active RA user to each selected area. Starter screening questions are reference prompts only; detailed SME responses can be submitted for independent review. No CCR approval is granted here. No emails are sent.</p>
 @if(session('success'))<div class="mt-4 rounded-lg p-4" role="status" style="background:#dcfce7;color:#166534">{{ session('success') }}</div>@endif
 @if($errors->any())<div class="mt-4 rounded-lg border p-4" role="alert" style="background:#fff1f2;color:#9f1239;border-color:#fecdd3">@foreach($errors->all() as $error)<p>{{ $error }}</p>@endforeach</div>@endif
 @if(empty($areas))<section class="mt-5 rounded-xl bg-white p-5">No applicable impact areas selected yet. <a href="{{ route('ccr.impacts.edit', $record->id) }}" style="color:var(--ra-accent)">Select impact areas first</a>.</section>@endif

@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>My CCR Assessments | CMSoftware</title>@vite(['resources/css/app.css','resources/js/app.js'])</head>
 <body class="min-h-screen bg-slate-100 text-slate-900">@include('partials.regatlas-navigation')
 <main class="mx-auto max-w-5xl p-6"><h1 class="text-2xl font-bold">My CCR SME assessments</h1>
-<p class="mt-2 text-sm text-slate-600">Only assignments addressed to your account appear here. Responses remain drafts.</p>
+<p class="mt-2 text-sm text-slate-600">Only assignments addressed to your account appear here. Assessments stay editable until formally submitted; human review is independent.</p>
 <div class="mt-5 space-y-3">@forelse($assignments as $assignment)
 <section class="rounded-xl border bg-white p-5" style="border-color:var(--ra-stroke)">
 <p class="font-bold">{{ $assignment->ccr_number }} — {{ $labels[$assignment->area_code] ?? $assignment->area_code }}</p>
