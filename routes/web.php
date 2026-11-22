@@ -115,8 +115,15 @@ Route::middleware(['auth', 'active'])->get('/my/iar-reminders', function () {
         ->whereIn('n.event_type', ['iar.reminder.creator', 'iar.reminder.assessor'])
         ->select('n.*', 'i.iar_number')
         ->orderByDesc('n.id')->paginate(15);
-    return view('iar.reminders', compact('reminders'));
+    $unreadCount = \Illuminate\Support\Facades\DB::table('notification_logs')
+        ->where('recipient_user_id', auth()->id())
+        ->whereIn('event_type', ['iar.reminder.creator', 'iar.reminder.assessor'])
+        ->whereNull('read_at')->count();
+    return view('iar.reminders', compact('reminders', 'unreadCount'));
 })->name('iar.reminders');
+
+// Phase 6B.4A: owner-only, POST+CSRF, idempotent read acknowledgement.
+Route::middleware(['auth', 'active'])->post('/my/iar-reminders/{notificationId}/read', \App\Http\Controllers\IarReminderReadController::class)->whereNumber('notificationId')->name('iar.reminders.read');
 
 // Phase 6C.2: explicitly resolve audited pending country assignment using approved primary Local RA mapping.
 Route::middleware(['auth', 'active'])->group(function () {
