@@ -22,6 +22,25 @@
      <time class="text-sm text-slate-500" datetime="{{ \Carbon\Carbon::parse($item->created_at, 'UTC')->toIso8601String() }}">{{ \Carbon\Carbon::parse($item->created_at, 'UTC')->setTimezone(auth()->user()->timezone ?: 'UTC')->format('Y-m-d H:i T') }}</time>
     </div>
     <p class="mt-2 text-sm">{{ $item->event_type === 'iar.reminder.creator' ? 'Creator reminder — outstanding country assessments require follow-up.' : 'Assessor reminder — your assigned country assessments require a response.' }}</p>
+    {{-- Current state only: notification_logs has no historical country snapshot. --}}
+    @php
+      $raSnapshot = app(\App\Services\Iar\PendingReminderCountries::class)
+        ->forIar((int) $item->impact_assessment_id);
+      $raIsCreatorReminder = $item->event_type === 'iar.reminder.creator';
+      $raAssigned = $raIsCreatorReminder
+        ? $raSnapshot['assigned']->pluck('country')->unique()->values()
+        : $raSnapshot['assigned']->where('assigned_to_user_id', auth()->id())->pluck('country')->unique()->values();
+      $raUnassigned = $raIsCreatorReminder ? $raSnapshot['unassigned'] : collect();
+    @endphp
+    <div class="mt-3 text-sm">
+      <p><strong>Current assigned assessments pending:</strong>
+        {{ $raAssigned->isNotEmpty() ? $raAssigned->implode(', ') : 'None' }}</p>
+      @if($raIsCreatorReminder)
+        <p class="mt-1"><strong>Pending assessor assignment:</strong>
+          {{ $raUnassigned->isNotEmpty() ? $raUnassigned->implode(', ') : 'None' }}</p>
+      @endif
+      <p class="mt-1 text-xs opacity-70">Current live status; historical notification details are not stored in this release.</p>
+    </div>
     <a href="{{ route('iar.show', $item->impact_assessment_id) }}" class="mt-2 inline-block text-sm font-semibold ra-reminder-link">Open IAR details</a>
    </article>
   @empty

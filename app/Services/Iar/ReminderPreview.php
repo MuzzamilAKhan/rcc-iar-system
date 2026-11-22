@@ -27,23 +27,23 @@ final class ReminderPreview
             $cycle = 1 + intdiv((int) floor($days) - 14, 7);
             $cycleAt = $submitted->addDays(14 + 7 * ($cycle - 1));
 
-            $pending = DB::table('iar_assignments as a')
-                ->join('countries as c', 'c.id', '=', 'a.country_id')
-                ->leftJoin('assessment_responses as r', 'r.iar_assignment_id', '=', 'a.id')
-                ->where('a.impact_assessment_id', $iar->id)
-                ->whereNull('a.completed_at')
-                ->where(function ($q) {
-                    $q->whereNull('r.id')->orWhereNull('r.submitted_at');
-                })
-                ->select('a.id', 'a.assigned_to_user_id', 'c.name as country')
-                ->orderBy('c.name')->get();
-            if ($pending->isEmpty()) continue;
+            // Phase 6C.3: include unassigned country exceptions in the creator view.
+            // Completed assignments and resolved exceptions are excluded.
+            $snapshot = app(PendingReminderCountries::class)->forIar((int) $iar->id);
+            $pending = $snapshot['assigned'];
+            $unassigned = $snapshot['unassigned'];
+            if ($pending->isEmpty() && $unassigned->isEmpty()) continue;
+            $assignedNames = $pending->pluck('country')->unique()->values()->all();
+            $unassignedNames = $unassigned->unique()->values()->all();
+            $allNames = array_values(array_unique(array_merge($assignedNames, $unassignedNames)));
+            sort($allNames, SORT_NATURAL | SORT_FLAG_CASE);
             $creator = DB::table('users')->where('id', $iar->creator_id)->where('is_active', 1)->first(['id', 'name', 'email']);
             $recipients = [];
             if ($creator) {
                 $recipients[] = ['role' => 'creator', 'user_id' => (int) $creator->id,
                     'name' => $creator->name, 'email' => $creator->email,
-                    'countries' => $pending->pluck('country')->values()->all()];
+                    'countries' => $allNames, 'assigned_countries' => $assignedNames,
+                    'unassigned_countries' => $unassignedNames];
             }
             foreach ($pending->groupBy('assigned_to_user_id') as $userId => $assignments) {
                 $user = DB::table('users')->where('id', $userId)->where('is_active', 1)->first(['id', 'name', 'email']);
@@ -56,7 +56,10 @@ final class ReminderPreview
             $results[] = [
                 'iar_id' => (int) $iar->id, 'iar_number' => $iar->iar_number,
                 'cycle' => $cycle, 'cycle_due_utc' => $cycleAt->toIso8601String(),
-                'pending_country_count' => $pending->count(), 'recipients' => $recipients,
+                'pending_country_count' => count($allNames),
+                'assigned_pending_count' => count($assignedNames),
+                'unassigned_country_count' => count($unassignedNames),
+                'recipients' => $recipients,
             ];
         }
         return $results;
