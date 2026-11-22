@@ -4,6 +4,7 @@
   <a class="ra-sidebar-brand" href="{{ route('dashboard') }}"><span class="ra-logo">R</span><span><strong>RegAtlas</strong><small>Regulatory Workspace</small></span></a>
   <p class="ra-sidebar-label">WORKSPACE</p>
   <nav class="ra-sidebar-menu" aria-label="Primary navigation">
+    <a href="{{ route('ccr.index') }}" @if(request()->routeIs('ccr.*')) aria-current="page" @endif><span aria-hidden="true">▣</span> Change control</a>
     <a href="{{ route('dashboard') }}" @if(request()->routeIs('dashboard')) aria-current="page" @endif><span aria-hidden="true">▦</span> Dashboard</a>
     @can('iar.create')<a href="{{ route('iar.create') }}" @if(request()->routeIs('iar.create')) aria-current="page" @endif><span aria-hidden="true">＋</span> New assessment</a>@endcan
     @if(auth()->user()->can('iar.view.own') || auth()->user()->can('iar.view.all') || auth()->user()->can('iar.view.assigned'))

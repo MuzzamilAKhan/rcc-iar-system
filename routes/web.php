@@ -138,3 +138,12 @@ Route::middleware(['auth','active','role:super-admin'])->group(function () {
     Route::post('/admin/local-ra/primary-mapping/synthetic-activation', [\App\Http\Controllers\CountryPrimaryMappingController::class,'activateSynthetic'])->name('admin.primary-mapping.demo-activate');
 });
 
+
+
+// CMSoftware Phase CCR1: independent draft change-control foundation.
+\Illuminate\Support\Facades\Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/change-controls', [\App\Http\Controllers\CcrController::class, 'index'])->name('ccr.index');
+    Route::get('/change-controls/create', [\App\Http\Controllers\CcrController::class, 'create'])->name('ccr.create');
+    Route::post('/change-controls', [\App\Http\Controllers\CcrController::class, 'store'])->name('ccr.store');
+    Route::get('/change-controls/{id}', [\App\Http\Controllers\CcrController::class, 'show'])->whereNumber('id')->name('ccr.show');
+});

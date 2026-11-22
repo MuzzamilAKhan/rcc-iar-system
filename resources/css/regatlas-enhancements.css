@@ -159,3 +159,37 @@ html[data-ra-theme="dark"] .ra-reminder-bubble{background:#1c898e;color:#fff}
 .ra-reminder-empty p{color:var(--ra-fg-muted)}
 .ra-reminder-count{font-size:12px;font-weight:700;border:1px solid var(--ra-stroke);border-radius:30px;padding:6px 10px;color:var(--ra-fg-muted)}
 @media(max-width:500px){.ra-reminder-bell-label{display:none}.ra-reminder-bell{padding:8px}}
+/* CM / CCR action buttons */
+.btn-ccr-primary,
+a.btn-ccr-primary,
+button.btn-ccr-primary {
+    background-color: #0f8b8d;
+    border: 1px solid #0f8b8d;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.btn-ccr-primary:hover,
+a.btn-ccr-primary:hover,
+button.btn-ccr-primary:hover {
+    background-color: #0c7274;
+    border-color: #0c7274;
+    color: #ffffff !important;
+}
+
+.btn-ccr-primary:focus,
+a.btn-ccr-primary:focus,
+button.btn-ccr-primary:focus {
+    background-color: #0c7274;
+    border-color: #0c7274;
+    color: #ffffff !important;
+    box-shadow: 0 0 0 0.2rem rgba(15, 139, 141, 0.2);
+}
+
+.btn-ccr-primary:disabled,
+button.btn-ccr-primary:disabled {
+    background-color: #8fbfc0;
+    border-color: #8fbfc0;
+    color: #ffffff !important;
+    opacity: 1;
+}

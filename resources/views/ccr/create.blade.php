@@ -1,0 +1,17 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>New CCR | CMSoftware</title>@vite(['resources/css/app.css','resources/js/app.js'])</head>
+<body class="min-h-screen bg-slate-100 text-slate-900">@include('partials.regatlas-navigation')
+<main class="mx-auto max-w-4xl p-6"><a href="{{ route('ccr.index') }}" class="text-indigo-700">&larr; Change Control</a><h1 class="mt-5 text-2xl font-bold">Create Change Control Record</h1>
+<p class="mt-2 text-sm text-slate-600">Capture current vs proposed state before impact assessment. This creates a draft only.</p>
+@if($errors->any())<div role="alert" class="mt-4 rounded-lg border border-red-300 bg-red-50 p-4 text-red-800"><strong>Please correct:</strong><ul class="list-disc pl-6">@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+<form class="mt-5 space-y-4 rounded-xl bg-white p-6 shadow-sm" method="POST" action="{{ route('ccr.store') }}">@csrf
+<label class="block font-semibold">Change title <input required maxlength="200" name="title" value="{{ old('title') }}" class="mt-1 w-full rounded-lg border p-2"></label>
+<label class="block font-semibold">Change type <select name="change_type" required class="mt-1 w-full rounded-lg border p-2"><option value="">Select</option>@foreach(['design'=>'Design','materials'=>'Materials','manufacturing'=>'Manufacturing','software'=>'Software','labelling'=>'Labelling','supplier'=>'Supplier','other'=>'Other'] as $key=>$label)<option value="{{ $key }}" @selected(old('change_type')===$key)>{{ $label }}</option>@endforeach</select></label>
+<label class="block font-semibold">Linked devices / SAP codes <select name="product_ids[]" required multiple size="7" class="mt-1 w-full rounded-lg border p-2">@foreach($products as $product)<option value="{{ $product->id }}" @selected(in_array($product->id,old('product_ids',[])))>{{ $product->sap_code }} — {{ $product->product_name }}</option>@endforeach</select><span class="block text-xs font-normal text-slate-500">Ctrl-click to select multiple devices. Up to 500 registry products are shown in this first release.</span></label>
+@foreach(['current_state'=>'Current state','proposed_state'=>'Proposed state','reason_for_change'=>'Reason for change','affected_scope'=>'Affected parts, materials, configurations, sites or documents (optional)'] as $key=>$label)<label class="block font-semibold">{{ $label }}<textarea name="{{ $key }}" rows="3" @if($key!=='affected_scope') required @endif class="mt-1 w-full rounded-lg border p-2">{{ old($key) }}</textarea></label>@endforeach
+<label class="block font-semibold">Duration <select name="change_duration" class="mt-1 w-full rounded-lg border p-2"><option value="permanent" @selected(old('change_duration','permanent')==='permanent')>Permanent</option><option value="temporary" @selected(old('change_duration')==='temporary')>Temporary</option></select></label>
+<label class="block font-semibold">Target implementation date (optional) <input type="date" name="target_implementation_date" value="{{ old('target_implementation_date') }}" class="mt-1 w-full rounded-lg border p-2"></label>
+<button type="submit"
+    class="rounded-lg px-5 py-3 font-semibold shadow-sm"
+    style="background-color: #0f8b8d !important; color: #ffffff !important; cursor: pointer;">
+    Save Draft CCR
+</button></form></main></body></html>
