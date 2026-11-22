@@ -1,7 +1,40 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>{{ $record->ccr_number }} | CMSoftware</title>@vite(['resources/css/app.css','resources/js/app.js'])</head>
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ $record->ccr_number }} | CMSoftware</title>@vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+
 <body class="min-h-screen bg-slate-100 text-slate-900">@include('partials.regatlas-navigation')
-<main class="mx-auto max-w-4xl p-6"><a href="{{ route('ccr.index') }}" class="text-indigo-700">&larr; Change Control</a><section class="mt-5 rounded-xl bg-white p-6 shadow-sm"><h1 class="text-2xl font-bold">{{ $record->ccr_number }}</h1><p class="mt-2 text-lg">{{ $record->title }}</p><p class="text-sm text-slate-500">Status: {{ strtoupper($record->status) }} · Type: {{ $record->change_type }} · {{ $record->change_duration }}</p>
-@if(session('success'))<p class="mt-3 text-green-700">{{ session('success') }}</p>@endif
-<h2 class="mt-5 text-lg font-bold">Linked devices</h2><ul class="mt-2 list-disc pl-5">@foreach($products as $product)<li>{{ $product->sap_code }} — {{ $product->product_name }}</li>@endforeach</ul>
-@foreach(['current_state'=>'Current state','proposed_state'=>'Proposed state','reason_for_change'=>'Reason for change','affected_scope'=>'Affected scope'] as $key=>$label)<h2 class="mt-5 font-bold">{{ $label }}</h2><p class="mt-1 whitespace-pre-wrap">{{ $record->$key ?: 'Not specified' }}</p>@endforeach
-<p class="mt-5 text-sm text-slate-500">Next release: select impact areas and assign SME assessments. AI, approval, implementation and closure not enabled yet.</p></section></main></body></html>
+    <main class="mx-auto max-w-4xl p-6"><a href="{{ route('ccr.index') }}" class="text-indigo-700">&larr; Change
+            Control</a>
+        <section class="mt-5 rounded-xl bg-white p-6 shadow-sm">
+            <h1 class="text-2xl font-bold">{{ $record->ccr_number }}</h1>
+            <p class="mt-2 text-lg">{{ $record->title }}</p>
+            <p class="text-sm text-slate-500">Status: {{ strtoupper($record->status) }} · Type:
+                {{ $record->change_type }} · {{ $record->change_duration }}</p>
+            @if(session('success'))
+            <p class="mt-3 text-green-700">{{ session('success') }}</p>@endif
+            <h2 class="mt-5 text-lg font-bold">Linked devices</h2>
+            <ul class="mt-2 list-disc pl-5">@foreach($products as $product)
+            <li>{{ $product->sap_code }} — {{ $product->product_name }}</li>@endforeach
+            </ul>
+            @foreach(['current_state' => 'Current state', 'proposed_state' => 'Proposed state', 'reason_for_change' => 'Reason for change', 'affected_scope' => 'Affected scope'] as $key => $label)
+                <h2 class="mt-5 font-bold">{{ $label }}</h2>
+            <p class="mt-1 whitespace-pre-wrap">{{ $record->$key ?: 'Not specified' }}</p>@endforeach
+            <div class="mt-6">
+                <a href="{{ route('ccr.impacts.edit', $record->id) }}"
+                    class="inline-block rounded-lg px-5 py-3 font-semibold shadow-sm"
+                    style="background-color:#0f8b8d !important; color:#ffffff !important; text-decoration:none;">
+                    Select cross-functional impact areas
+                </a>
+            </div>
+            <p class="mt-5 text-sm text-slate-500">Next release: select impact areas and assign SME assessments. AI,
+                approval, implementation and closure not enabled yet.</p>
+        </section>
+    </main>
+</body>
+
+</html>

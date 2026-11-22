@@ -20,9 +20,9 @@ Route::middleware(['auth', 'active'])->group(function () {
         $user = auth()->user();
         abort_unless(
             $impactAssessment->creator_id === $user->id
-            || $user->can('iar.view.all')
-            || ($user->can('iar.view.assigned') && $impactAssessment->assignments()
-                ->where('assigned_to_user_id', $user->id)->exists()),
+                || $user->can('iar.view.all')
+                || ($user->can('iar.view.assigned') && $impactAssessment->assignments()
+                    ->where('assigned_to_user_id', $user->id)->exists()),
             403
         );
         $impactAssessment->load(['creator', 'products.product']);
@@ -54,7 +54,7 @@ Route::middleware(['auth', 'active'])
     ->get('/admin/import-issues', function () {
         abort_unless(
             auth()->user()->can('manage-master-data')
-            || auth()->user()->hasRole('global-ra'),
+                || auth()->user()->hasRole('global-ra'),
             403
         );
 
@@ -70,7 +70,7 @@ Route::middleware(['auth', 'active', 'role:super-admin'])->get('/admin/users', f
         $user = auth()->user();
         abort_unless(
             $user->can('iar.view.all') ||
-            ($impactAssessment->creator_id === $user->id && $user->can('iar.view.own')),
+                ($impactAssessment->creator_id === $user->id && $user->can('iar.view.own')),
             403
         );
         $report = $readiness->inspect($impactAssessment);
@@ -132,10 +132,10 @@ Route::middleware(['auth', 'active'])->group(function () {
 });
 
 // Phase 6C.2A: Super Admin primary mapping management; synthetic demo activation only in local env.
-Route::middleware(['auth','active','role:super-admin'])->group(function () {
-    Route::get('/admin/local-ra/primary-mapping', [\App\Http\Controllers\CountryPrimaryMappingController::class,'index'])->name('admin.primary-mapping.index');
-    Route::post('/admin/local-ra/primary-mapping', [\App\Http\Controllers\CountryPrimaryMappingController::class,'store'])->name('admin.primary-mapping.store');
-    Route::post('/admin/local-ra/primary-mapping/synthetic-activation', [\App\Http\Controllers\CountryPrimaryMappingController::class,'activateSynthetic'])->name('admin.primary-mapping.demo-activate');
+Route::middleware(['auth', 'active', 'role:super-admin'])->group(function () {
+    Route::get('/admin/local-ra/primary-mapping', [\App\Http\Controllers\CountryPrimaryMappingController::class, 'index'])->name('admin.primary-mapping.index');
+    Route::post('/admin/local-ra/primary-mapping', [\App\Http\Controllers\CountryPrimaryMappingController::class, 'store'])->name('admin.primary-mapping.store');
+    Route::post('/admin/local-ra/primary-mapping/synthetic-activation', [\App\Http\Controllers\CountryPrimaryMappingController::class, 'activateSynthetic'])->name('admin.primary-mapping.demo-activate');
 });
 
 
@@ -146,4 +146,10 @@ Route::middleware(['auth','active','role:super-admin'])->group(function () {
     Route::get('/change-controls/create', [\App\Http\Controllers\CcrController::class, 'create'])->name('ccr.create');
     Route::post('/change-controls', [\App\Http\Controllers\CcrController::class, 'store'])->name('ccr.store');
     Route::get('/change-controls/{id}', [\App\Http\Controllers\CcrController::class, 'show'])->whereNumber('id')->name('ccr.show');
+});
+
+// Phase CCR2: owner-scoped, auditable selection of the 16 cross-functional impact areas.
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/change-controls/{id}/impact-areas', [\App\Http\Controllers\CcrImpactController::class, 'edit'])->whereNumber('id')->name('ccr.impacts.edit');
+    Route::post('/change-controls/{id}/impact-areas', [\App\Http\Controllers\CcrImpactController::class, 'update'])->whereNumber('id')->name('ccr.impacts.update');
 });
