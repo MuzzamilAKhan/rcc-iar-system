@@ -204,3 +204,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/change-controls/{id}/actions', [\App\Http\Controllers\CcrActionController::class, 'store'])->whereNumber('id')->name('ccr.actions.store');
     Route::get('/my/ccr-actions', [\App\Http\Controllers\CcrActionController::class, 'myQueue'])->name('ccr.actions.my');
 });
+
+
+// CCR5B: potential/confirmed document impacts and reference-only evidence metadata.
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/change-controls/{id}/documents', [\App\Http\Controllers\CcrDocumentTraceController::class, 'index'])->whereNumber('id')->name('ccr.documents.index');
+    Route::post('/change-controls/{id}/documents', [\App\Http\Controllers\CcrDocumentTraceController::class, 'addDocument'])->whereNumber('id')->name('ccr.documents.add');
+    Route::post('/change-controls/{id}/documents/{documentId}/confirm', [\App\Http\Controllers\CcrDocumentTraceController::class, 'confirm'])->whereNumber('id')->whereNumber('documentId')->name('ccr.documents.confirm');
+    Route::post('/change-controls/{id}/evidence-references', [\App\Http\Controllers\CcrDocumentTraceController::class, 'addEvidence'])->whereNumber('id')->name('ccr.documents.evidence');
+});

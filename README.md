@@ -312,3 +312,7 @@ Update this README at every verified Git checkpoint: current commit, test counts
 ### CCR4A local-only installation (24 November 2026)
 
 CCR4A adds explicit mandatory per-country regulatory screening discovery from linked product registrations, a source-provenance snapshot, owner/admin access control, idempotent audit and an unresolved-coverage warning. **It does not decide regulatory pathways or grant approval.** Until committed, this subsection describes local intended work only. Run `php artisan test --filter=CcrRegulatoryMarketTest` and the full test suite before migrating on a verified local database.
+
+### CCR5B — controlled document impacts and evidence references (local-only)
+
+Based on committed CCR5A checkpoint `16d4808`, CCR5B adds `ccr_document_impacts` (potential vs explicitly confirmed document impact) and `ccr_evidence_references` (metadata-only source references). Selected impact area and proposed action links are constrained to the same CCR. Record creation and explicit impact confirmation are audited. These records do **not** approve document revisions, verify authenticity of source evidence, authorize implementation, or grant regulatory/QA/CRB approvals. Local Laravel tests and database migration must be run before the new files are committed. Contabo remains untouched.
