@@ -18,6 +18,10 @@
             <a href="{{ route('ccr.sme-drafts.index') }}" @if(request()->routeIs('ccr.sme-drafts.*')) aria-current="page"
             @endif><span aria-hidden="true">✎</span> My CCR assessments</a>
             <a href="{{ route('ccr.regulatory-drafts.my') }}" @if(request()->routeIs('ccr.regulatory-drafts.*')) aria-current="page" @endif><span aria-hidden="true">▤</span> My regulatory assessments</a>
+            {{-- CCR4C: independent RA market review queue --}}
+            @role('super-admin')
+            <a href="{{ route('ccr.regulatory-reviews.index') }}" @if(request()->routeIs('ccr.regulatory-reviews.index','ccr.regulatory-reviews.show')) aria-current="page" @endif><span aria-hidden="true">▤</span> Regulatory review queue</a>
+            @endrole
             {{-- CCR3C: Independent SME review queue — Super Admin only --}}
             @role('super-admin')
             <a href="{{ route('ccr.sme-reviews.index') }}" @if(request()->routeIs('ccr.sme-reviews.index', 'ccr.sme-reviews.show')) aria-current="page" @endif>

@@ -21,6 +21,7 @@
 <button type="submit" class="rounded-lg px-5 py-3 font-semibold" style="background:#0f8b8d!important;color:white!important">{{ $screenings->isEmpty() ? 'Initialize mandatory market screening' : 'Record newly discovered registration sources' }}</button>
 </form>@endif
 </section>
+<a href="{{ route('ccr.regulatory-reviews.readiness',$record->id) }}" class="mt-5 inline-block rounded-lg px-4 py-2 font-semibold" style="background:#0e6b83!important;color:white!important">Regulatory readiness / blockers preview</a>
 <h2 class="mt-6 text-lg font-bold">Market screening queue — {{ $screenings->count() }} market(s)</h2>
 @forelse($screenings as $screening)
 <section class="mt-3 rounded-xl border bg-white p-5" style="border-color:var(--ra-stroke)">
@@ -45,5 +46,5 @@
 @endif
 </section>
 @empty<section class="mt-3 rounded-xl bg-white p-5">No market screening records initialized yet. No market is deemed cleared.</section>@endforelse
-<p class="mt-5 text-sm text-slate-600">CCR4B supports RA assignments and preliminary human-authored drafts. Formal submission, independent review and market release controls are not enabled.</p>
+<p class="mt-5 text-sm text-slate-600">CCR4C supports independent review and read-only readiness blockers. No market release, authority filing, QA/CRB or CCR approval is enabled.</p>
 </main></body></html>

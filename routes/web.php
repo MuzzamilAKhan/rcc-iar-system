@@ -188,3 +188,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/ccr-regulatory-markets/{screeningId}/draft', [\App\Http\Controllers\CcrRegulatoryDraftController::class, 'edit'])->whereNumber('screeningId')->name('ccr.regulatory-drafts.edit');
     Route::post('/ccr-regulatory-markets/{screeningId}/draft', [\App\Http\Controllers\CcrRegulatoryDraftController::class, 'save'])->whereNumber('screeningId')->name('ccr.regulatory-drafts.save');
 });
+
+// CCR4C — independent human regulatory review and read-only blockers preview.
+Route::middleware(['auth','active'])->group(function () {
+    Route::post('/ccr-regulatory-markets/{screeningId}/submit', [\App\Http\Controllers\CcrRegulatoryReviewController::class, 'submit'])->whereNumber('screeningId')->name('ccr.regulatory-reviews.submit');
+    Route::get('/ccr-regulatory-reviews', [\App\Http\Controllers\CcrRegulatoryReviewController::class, 'index'])->name('ccr.regulatory-reviews.index');
+    Route::get('/ccr-regulatory-reviews/{screeningId}', [\App\Http\Controllers\CcrRegulatoryReviewController::class, 'show'])->whereNumber('screeningId')->name('ccr.regulatory-reviews.show');
+    Route::post('/ccr-regulatory-reviews/{screeningId}/decision', [\App\Http\Controllers\CcrRegulatoryReviewController::class, 'decide'])->whereNumber('screeningId')->name('ccr.regulatory-reviews.decide');
+    Route::get('/change-controls/{ccrId}/regulatory-readiness', [\App\Http\Controllers\CcrRegulatoryReviewController::class, 'readiness'])->whereNumber('ccrId')->name('ccr.regulatory-reviews.readiness');
+});

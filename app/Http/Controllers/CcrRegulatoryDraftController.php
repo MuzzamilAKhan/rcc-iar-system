@@ -115,7 +115,7 @@ final class CcrRegulatoryDraftController
             abort_unless($ccr && $ccr->status === 'draft', 409);
             $draft = DB::table('ccr_regulatory_drafts')->where('screening_id', $screeningId)->lockForUpdate()->first();
             abort_unless($draft && (int)$draft->assigned_to_user_id === (int)$request->user()->id, 403);
-            abort_unless(in_array($draft->status, ['assigned','draft'], true), 409);
+            abort_unless(in_array($draft->status, ['assigned','draft','returned'], true), 409);
             $screening = DB::table('ccr_regulatory_market_screenings')->where('id', $screeningId)->first();
             abort_unless($screening && $screening->status === 'pending_regulatory_screening', 409);
             // A generic GB registry record never establishes GB-vs-NI scope. Do not permit a
