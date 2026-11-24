@@ -1,7 +1,7 @@
 # CMSoftware — Change Control & Regulatory Intelligence Platform
 
 > **Project status (23 November 2026): Active development / local UAT.**  
-> **Current committed baseline:** `9fdb399` (`main`, CCR3C). **CCR4A is the next local-only phase; do not assume it is deployed.**
+> **Last verified Git baseline before CCR4B:** `1336dbf` (`main`, CCR4A). **CCR4B is local-only and not yet deployed.**
 > **Legacy application branding:** RegAtlas / RCC-IAR. **Target branding:** CMSoftware (client-requested; global rebrand pending).  
 > **Not a validated production medical-device quality or regulatory decision system.** All regulatory conclusions and approvals require qualified human review.
 

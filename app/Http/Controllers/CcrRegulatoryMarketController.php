@@ -63,8 +63,17 @@ final class CcrRegulatoryMarketController
         $missingSourceCount = $sources->whereNotIn('registration_id', $knownSourceIds)->count();
         $impactDecisionCount = DB::table('ccr_impact_decisions')
             ->where('change_control_record_id', $id)->count();
+        $raDrafts = DB::table('ccr_regulatory_drafts as d')
+            ->join('users as u', 'u.id', '=', 'd.assigned_to_user_id')
+            ->join('ccr_regulatory_market_screenings as s', 's.id', '=', 'd.screening_id')
+            ->where('s.change_control_record_id', $id)
+            ->select('d.screening_id', 'd.assigned_to_user_id', 'd.status', 'u.name as assessor_name')
+            ->get()->keyBy('screening_id');
+        $raCandidates = \App\Models\User::query()->where('is_active', true)
+            ->whereHas('roles', fn ($q) => $q->whereIn('name', ['super-admin','global-ra','local-ra']))
+            ->orderBy('name')->get(['id','name']);
         return view('ccr.regulatory-markets', compact('record', 'sources', 'screenings',
-            'sourceCounts', 'missingSourceCount', 'impactDecisionCount'));
+            'sourceCounts', 'missingSourceCount', 'impactDecisionCount', 'raDrafts', 'raCandidates'));
     }
 
     public function initialize(Request $request, int $id): RedirectResponse

@@ -180,3 +180,11 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/ccr-sme-assignments/{assignmentId}/draft', [\App\Http\Controllers\CcrSmeDraftController::class, 'edit'])->whereNumber('assignmentId')->name('ccr.sme-drafts.edit');
     Route::post('/ccr-sme-assignments/{assignmentId}/draft', [\App\Http\Controllers\CcrSmeDraftController::class, 'save'])->whereNumber('assignmentId')->name('ccr.sme-drafts.save');
 });
+
+// CCR4B: preliminary country RA assignments and assignee-owned drafts only.
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::post('/ccr-regulatory-markets/{screeningId}/assign', [\App\Http\Controllers\CcrRegulatoryDraftController::class, 'assign'])->whereNumber('screeningId')->name('ccr.regulatory-drafts.assign');
+    Route::get('/my/ccr-regulatory-assessments', [\App\Http\Controllers\CcrRegulatoryDraftController::class, 'myQueue'])->name('ccr.regulatory-drafts.my');
+    Route::get('/ccr-regulatory-markets/{screeningId}/draft', [\App\Http\Controllers\CcrRegulatoryDraftController::class, 'edit'])->whereNumber('screeningId')->name('ccr.regulatory-drafts.edit');
+    Route::post('/ccr-regulatory-markets/{screeningId}/draft', [\App\Http\Controllers\CcrRegulatoryDraftController::class, 'save'])->whereNumber('screeningId')->name('ccr.regulatory-drafts.save');
+});

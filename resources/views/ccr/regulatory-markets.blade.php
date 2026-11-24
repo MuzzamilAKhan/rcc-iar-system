@@ -29,7 +29,21 @@
 @if($screening->jurisdiction_hint === 'uk_jurisdiction_review')<p class="mt-2 text-sm" style="color:#92400e">UK jurisdiction unresolved: RA must distinguish GB versus Northern Ireland and identify the applicable route.</p>
 @elseif($screening->jurisdiction_hint === 'us_review')<p class="mt-2 text-sm">US regulatory pathway assessment required from authorized RA.</p>
 @else<p class="mt-2 text-sm">Applicable local/EEA/other jurisdiction pathway must be determined by qualified RA; no pathway inferred automatically.</p>@endif
+@php($raDraft = $raDrafts->get($screening->id))
+@if($raDraft)
+<p class="mt-3 text-sm"><strong>Assigned regulatory assessor:</strong> {{ $raDraft->assessor_name }} · Draft state: {{ $raDraft->status }}</p>
+@if((int)$raDraft->assigned_to_user_id === (int)auth()->id())
+<a href="{{ route('ccr.regulatory-drafts.edit', $screening->id) }}" class="mt-2 inline-block rounded-lg px-4 py-2 font-semibold" style="background:#0f8b8d!important;color:#fff!important">Open my RA draft</a>
+@endif
+@elseif($record->status === 'draft' && $screening->status === 'pending_regulatory_screening')
+<form method="POST" action="{{ route('ccr.regulatory-drafts.assign', $screening->id) }}" class="mt-4 flex flex-wrap items-end gap-3">@csrf
+<label class="text-sm font-semibold">Assign RA assessor
+<select name="assigned_to_user_id" required class="mt-1 block min-w-64 rounded-lg border p-2"><option value="">Select active RA user</option>
+@foreach($raCandidates as $candidate)<option value="{{ $candidate->id }}">{{ $candidate->name }}</option>@endforeach
+</select></label>
+<button type="submit" class="rounded-lg px-4 py-2 font-semibold" style="background:#0f8b8d!important;color:#fff!important">Assign RA</button></form>
+@endif
 </section>
 @empty<section class="mt-3 rounded-xl bg-white p-5">No market screening records initialized yet. No market is deemed cleared.</section>@endforelse
-<p class="mt-5 text-sm text-slate-600">CCR4B will add RA assignments and human-authored determinations. This view is a controlled discovery foundation, not a release decision.</p>
+<p class="mt-5 text-sm text-slate-600">CCR4B supports RA assignments and preliminary human-authored drafts. Formal submission, independent review and market release controls are not enabled.</p>
 </main></body></html>
