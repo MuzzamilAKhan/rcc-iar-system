@@ -17,6 +17,7 @@
             @endif
             <a href="{{ route('ccr.sme-drafts.index') }}" @if(request()->routeIs('ccr.sme-drafts.*')) aria-current="page"
             @endif><span aria-hidden="true">✎</span> My CCR assessments</a>
+            <a href="{{ route('ccr.actions.my') }}" @if(request()->routeIs('ccr.actions.my')) aria-current="page" @endif><span aria-hidden="true">☷</span> My CCR actions</a>
             <a href="{{ route('ccr.regulatory-drafts.my') }}" @if(request()->routeIs('ccr.regulatory-drafts.*')) aria-current="page" @endif><span aria-hidden="true">▤</span> My regulatory assessments</a>
             {{-- CCR4C: independent RA market review queue --}}
             @role('super-admin')

@@ -197,3 +197,10 @@ Route::middleware(['auth','active'])->group(function () {
     Route::post('/ccr-regulatory-reviews/{screeningId}/decision', [\App\Http\Controllers\CcrRegulatoryReviewController::class, 'decide'])->whereNumber('screeningId')->name('ccr.regulatory-reviews.decide');
     Route::get('/change-controls/{ccrId}/regulatory-readiness', [\App\Http\Controllers\CcrRegulatoryReviewController::class, 'readiness'])->whereNumber('ccrId')->name('ccr.regulatory-reviews.readiness');
 });
+
+// CCR5A: proposed action register only (no approval, execution or completion).
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/change-controls/{id}/actions', [\App\Http\Controllers\CcrActionController::class, 'index'])->whereNumber('id')->name('ccr.actions.index');
+    Route::post('/change-controls/{id}/actions', [\App\Http\Controllers\CcrActionController::class, 'store'])->whereNumber('id')->name('ccr.actions.store');
+    Route::get('/my/ccr-actions', [\App\Http\Controllers\CcrActionController::class, 'myQueue'])->name('ccr.actions.my');
+});

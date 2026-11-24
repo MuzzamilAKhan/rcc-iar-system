@@ -1,5 +1,13 @@
 # CMSoftware — Change Control & Regulatory Intelligence Platform
 
+> **Current CCR5A development checkpoint (25 November 2026):** verified GitHub baseline `88a1341` (CCR4C; 149 tests / 690 assertions). CCR5A is a proposed-action register being installed/tested **locally**, not deployed to Contabo. See later sections for historical planning notes; some older milestone statements are superseded by this checkpoint.
+
+### CCR5A scope
+
+- CCR owner / Super Admin records **proposed** actions, authorized owners, due dates, optional selected impact area and dependency on an earlier action in the same CCR.
+- Assigned owners have a read-only **My CCR actions** queue. All action creation is audited. No automatic email or change approval.
+- Action completion, evidence verification, reassignment, editing, QA/CRB approval and implementation are **not yet enabled**.
+
 > **Project status (23 November 2026): Active development / local UAT.**  
 > **Last verified Git baseline before CCR4B:** `1336dbf` (`main`, CCR4A). **CCR4B is local-only and not yet deployed.**
 > **Legacy application branding:** RegAtlas / RCC-IAR. **Target branding:** CMSoftware (client-requested; global rebrand pending).  
