@@ -32,8 +32,8 @@
                 </a>
             </div>
             <div class="mt-4"><a href="{{ route('ccr.sme.index', $record->id) }}" class="inline-block rounded-lg px-5 py-3 font-semibold shadow-sm" style="background-color:#0f8b8d!important;color:white!important;text-decoration:none">Assign SME assessments</a></div>
-            <p class="mt-5 text-sm text-slate-500">Starter SME assignments are now available. Detailed assessment responses, AI,
-                approval, implementation and closure not enabled yet.</p>
+            <div class="mt-4"><a href="{{ route('ccr.regulatory-markets.index', $record->id) }}" class="inline-block rounded-lg px-5 py-3 font-semibold shadow-sm" style="background-color:#0e6b83!important;color:white!important;text-decoration:none">Mandatory regulatory market screening</a></div>
+            <p class="mt-5 text-sm text-slate-500">SME draft, submission and independent assessment review are available. Regulatory market screening discovery is available; human regulatory conclusions, QA/CRB approval, implementation and closure are not enabled yet.</p>
         </section>
     </main>
 </body>

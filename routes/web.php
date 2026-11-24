@@ -168,6 +168,12 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/ccr-sme-reviews/{assignmentId}/decision', [\App\Http\Controllers\CcrSmeReviewController::class, 'decide'])->whereNumber('assignmentId')->name('ccr.sme-reviews.decide');
 });
 
+// Phase CCR4A: mandatory country screening discovery (no determination or approval).
+Route::middleware(['auth', 'active'])->group(function () {
+    Route::get('/change-controls/{id}/regulatory-markets', [\App\Http\Controllers\CcrRegulatoryMarketController::class, 'index'])->whereNumber('id')->name('ccr.regulatory-markets.index');
+    Route::post('/change-controls/{id}/regulatory-markets', [\App\Http\Controllers\CcrRegulatoryMarketController::class, 'initialize'])->whereNumber('id')->name('ccr.regulatory-markets.initialize');
+});
+
 // Phase CCR3B: assignee-scoped SME draft responses, no submission/approval.
 Route::middleware(['auth', 'active'])->group(function () {
     Route::get('/my/ccr-assessments', [\App\Http\Controllers\CcrSmeDraftController::class, 'index'])->name('ccr.sme-drafts.index');

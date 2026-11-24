@@ -1,7 +1,7 @@
 # CMSoftware — Change Control & Regulatory Intelligence Platform
 
 > **Project status (23 November 2026): Active development / local UAT.**  
-> **Current GitHub baseline:** `9cb597c` (`main`, CCR3B). **CCR3C has been installed and tested on local WAMP, but its changes are not yet confirmed committed or pushed.**  
+> **Current committed baseline:** `9fdb399` (`main`, CCR3C). **CCR4A is the next local-only phase; do not assume it is deployed.**
 > **Legacy application branding:** RegAtlas / RCC-IAR. **Target branding:** CMSoftware (client-requested; global rebrand pending).  
 > **Not a validated production medical-device quality or regulatory decision system.** All regulatory conclusions and approvals require qualified human review.
 
@@ -58,7 +58,7 @@ CMSoftware (target product)
     ├── 16-area cross-functional applicability decisions            [Implemented]
     ├── SME assignments and starter screening questions             [Implemented]
     ├── SME draft responses / evidence references                   [Implemented]
-    ├── SME submission, independent human review, correction loop   [Local-tested, uncommitted]
+    ├── SME submission, independent human review, correction loop   [Implemented]
     ├── Mandatory market-specific regulatory screening              [Planned]
     ├── Controlled cross-functional questionnaire library           [Planned]
     ├── Actions, owners, dependencies, deadlines                     [Planned]
@@ -97,7 +97,7 @@ The existing IAR module and new CCR module are **currently separate**. They shou
 | **CCR2** | Committed `e235c82` | Explicit Applicable / Not Applicable decisions for 16 areas, rule-based suggestions, exclusion rationale, audit and deduplication. |
 | **CCR3A** | Committed `d02ba92` | One active RA SME assignment per selected area, starter screening question, audit, no silent reassignment. |
 | **CCR3B** | Committed `9cb597c` | Assignee-only SME drafts with answer, provisional conclusion, rationale, evidence references, audit and repeat-save idempotency. |
-| **CCR3C** | **Local-tested; Git checkpoint pending** | SME submission and edit lock, independent Super Admin review, accept/return with required comment, correction and resubmission, review queue and sidebar link. |
+| **CCR3C** | Committed `9fdb399` | SME submission and edit lock, independent Super Admin review, accept/return with required comment, correction and resubmission, review queue and sidebar link. |
 
 **Latest observed local test run:** `137 passed (609 assertions)` on 22 November 2026 (Pakistan local early 23 November), including CCR3C. Local CCR3C migration `2026_11_23_000004_add_ccr_sme_review_fields` completed; Blade cache succeeded. **Passing tests does not imply a regulatory validation, production readiness or a completed Git commit.**
 
@@ -271,7 +271,7 @@ The sidebar should expose the reviewer queue only to authorized reviewers; **bac
 
 ## 12. Release plan and current handoff
 
-**Immediate resume item (CCR3C checkpoint):**
+**Historical CCR3C handoff (completed at `9fdb399`):**
 
 1. Confirm latest local Git tree still has the intended CCR3C modified/new files and nothing unrelated.
 2. Confirm submitted/reviewed SME screen hides `Save SME draft` and returned/draft states can save; verify form opening tag and CSRF.
@@ -296,6 +296,11 @@ Update this README at every verified Git checkpoint: current commit, test counts
 
 ---
 
-**Last updated:** 23 November 2026 (Pakistan local time).  
+**Last updated:** 24 November 2026 (Pakistan local time).
 **Repository:** `MuzzamilAKhan/rcc-iar-system`  
 **Product label:** CMSoftware (planned) · RegAtlas (current UI / legacy identity)
+
+
+### CCR4A local-only installation (24 November 2026)
+
+CCR4A adds explicit mandatory per-country regulatory screening discovery from linked product registrations, a source-provenance snapshot, owner/admin access control, idempotent audit and an unresolved-coverage warning. **It does not decide regulatory pathways or grant approval.** Until committed, this subsection describes local intended work only. Run `php artisan test --filter=CcrRegulatoryMarketTest` and the full test suite before migrating on a verified local database.
