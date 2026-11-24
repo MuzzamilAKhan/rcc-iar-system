@@ -1,0 +1,6 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CCR action evidence review queue | CMSoftware</title>@vite(['resources/css/app.css','resources/js/app.js'])</head>
+<body class="min-h-screen bg-slate-100 text-slate-900">@include('partials.regatlas-navigation')
+<main class="mx-auto max-w-5xl p-6"><h1 class="text-2xl font-bold">CCR action evidence review queue</h1><p class="mt-2 text-sm">Independent review of preparation evidence only. Not an action completion or implementation approval.</p>
+@forelse($items as $item)<section class="mt-4 rounded-xl border bg-white p-5" style="border-color:var(--ra-stroke)"><p class="font-bold">{{ $item->ccr_number }} · #{{ $item->action_id }} — {{ $item->title }}</p><p class="mt-2">Owner: {{ $item->owner_name }} · Evidence: {{ strtoupper($item->status) }}</p><a href="{{ route('ccr.action-evidence.review',$item->action_id) }}" class="mt-3 inline-block rounded-lg px-4 py-2 font-semibold" style="background:#0f8b8d;color:#fff">View evidence</a></section>
+@empty<section class="mt-4 rounded-xl bg-white p-5">No submitted evidence packages.</section>@endforelse
+<div class="mt-4">{{ $items->links() }}</div></main></body></html>

@@ -19,6 +19,10 @@
             @endif><span aria-hidden="true">✎</span> My CCR assessments</a>
             <a href="{{ route('ccr.actions.my') }}" @if(request()->routeIs('ccr.actions.my')) aria-current="page" @endif><span aria-hidden="true">☷</span> My CCR actions</a>
             <a href="{{ route('ccr.regulatory-drafts.my') }}" @if(request()->routeIs('ccr.regulatory-drafts.*')) aria-current="page" @endif><span aria-hidden="true">▤</span> My regulatory assessments</a>
+            {{-- CCR5C: independent preliminary evidence-package review queue --}}
+            @role('super-admin')
+            <a href="{{ route('ccr.action-evidence.queue') }}" @if(request()->routeIs('ccr.action-evidence.queue','ccr.action-evidence.review')) aria-current="page" @endif><span aria-hidden="true">▤</span> Action evidence reviews</a>
+            @endrole
             {{-- CCR4C: independent RA market review queue --}}
             @role('super-admin')
             <a href="{{ route('ccr.regulatory-reviews.index') }}" @if(request()->routeIs('ccr.regulatory-reviews.index','ccr.regulatory-reviews.show')) aria-current="page" @endif><span aria-hidden="true">▤</span> Regulatory review queue</a>

@@ -316,3 +316,12 @@ CCR4A adds explicit mandatory per-country regulatory screening discovery from li
 ### CCR5B — controlled document impacts and evidence references (local-only)
 
 Based on committed CCR5A checkpoint `16d4808`, CCR5B adds `ccr_document_impacts` (potential vs explicitly confirmed document impact) and `ccr_evidence_references` (metadata-only source references). Selected impact area and proposed action links are constrained to the same CCR. Record creation and explicit impact confirmation are audited. These records do **not** approve document revisions, verify authenticity of source evidence, authorize implementation, or grant regulatory/QA/CRB approvals. Local Laravel tests and database migration must be run before the new files are committed. Contabo remains untouched.
+
+### CCR5C — Action evidence preparation and independent review (local UAT)
+
+- Base checkpoint: `7e2db23` (CCR5B), confirmed clean before patch.
+- Action owners may draft and submit **preliminary evidence references** with explanations; Super Admin may review or return for correction.
+- Review acceptance means the evidence *package was reviewed*, **not** verification that an action is complete, that a controlled document is approved, or that a change may be implemented. `ccr_actions.status` stays `proposed`.
+- This phase does not implement QA/CRB approval, action execution authorization, regulatory clearance, market release or CCR closure.
+- Migration: `2026_11_25_000003_create_ccr_action_evidence_reviews`; do not run on VPS without release approval.
+- Targeted tests: `php artisan test --filter=CcrActionEvidenceTest`; full suite expected to add four tests to prior 157.

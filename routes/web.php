@@ -213,3 +213,14 @@ Route::middleware(['auth', 'active'])->group(function () {
     Route::post('/change-controls/{id}/documents/{documentId}/confirm', [\App\Http\Controllers\CcrDocumentTraceController::class, 'confirm'])->whereNumber('id')->whereNumber('documentId')->name('ccr.documents.confirm');
     Route::post('/change-controls/{id}/evidence-references', [\App\Http\Controllers\CcrDocumentTraceController::class, 'addEvidence'])->whereNumber('id')->name('ccr.documents.evidence');
 });
+
+
+// CCR5C: preliminary action evidence-package review, never authorizes execution/completion.
+Route::middleware(['auth','active'])->group(function () {
+    Route::get('/ccr-actions/{actionId}/evidence', [\App\Http\Controllers\CcrActionEvidenceController::class, 'edit'])->whereNumber('actionId')->name('ccr.action-evidence.edit');
+    Route::post('/ccr-actions/{actionId}/evidence', [\App\Http\Controllers\CcrActionEvidenceController::class, 'save'])->whereNumber('actionId')->name('ccr.action-evidence.save');
+    Route::post('/ccr-actions/{actionId}/evidence/submit', [\App\Http\Controllers\CcrActionEvidenceController::class, 'submit'])->whereNumber('actionId')->name('ccr.action-evidence.submit');
+    Route::get('/ccr-action-evidence-reviews', [\App\Http\Controllers\CcrActionEvidenceController::class, 'queue'])->name('ccr.action-evidence.queue');
+    Route::get('/ccr-action-evidence-reviews/{actionId}', [\App\Http\Controllers\CcrActionEvidenceController::class, 'show'])->whereNumber('actionId')->name('ccr.action-evidence.review');
+    Route::post('/ccr-action-evidence-reviews/{actionId}/decision', [\App\Http\Controllers\CcrActionEvidenceController::class, 'decide'])->whereNumber('actionId')->name('ccr.action-evidence.decide');
+});

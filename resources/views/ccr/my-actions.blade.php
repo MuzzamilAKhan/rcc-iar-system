@@ -7,6 +7,7 @@
 <p class="font-bold">{{ $action->ccr_number }} · #{{ $action->id }} — {{ $action->title }}</p>
 <p class="mt-2 whitespace-pre-wrap">{{ $action->description }}</p>
 <p class="mt-2 text-sm">Due: {{ $action->due_date }} · Status: {{ $action->status }} · CCR: {{ $action->ccr_status }} · Dependency: {{ $action->depends_on_action_id ? '#'.$action->depends_on_action_id : 'None' }}</p>
+<a href="{{ route('ccr.action-evidence.edit', $action->id) }}" class="mt-3 inline-block rounded-lg px-4 py-2 font-semibold" style="background:#0e6b83;color:#fff">Prepare evidence package</a>
 </section>
 @empty<section class="mt-4 rounded-xl bg-white p-5">No proposed actions assigned to your account.</section>@endforelse
 <div class="mt-4">{{ $actions->links() }}</div>

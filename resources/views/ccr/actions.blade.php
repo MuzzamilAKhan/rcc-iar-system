@@ -12,6 +12,7 @@
 <p class="font-bold">#{{ $action->id }} — {{ $action->title }}</p><p class="mt-2 whitespace-pre-wrap">{{ $action->description }}</p>
 <p class="mt-2 text-sm">Owner: <strong>{{ $action->owner_name }}</strong> · Due: {{ $action->due_date }} · State: <strong>{{ strtoupper($action->status) }}</strong></p>
 <p class="mt-1 text-sm">Impact area: {{ $areas[$action->impact_area_code] ?? 'General / cross-functional' }} · Depends on: {{ $action->depends_on_action_id ? '#'.$action->depends_on_action_id : 'None' }}</p>
+<p class="mt-2 text-sm">Evidence preparation review is separate from action completion. @if((int)$action->owner_user_id === (int)auth()->id())<a href="{{ route('ccr.action-evidence.edit',$action->id) }}" style="color:var(--ra-accent)">Prepare evidence package</a>@endif</p>
 </section>
 @empty<section class="mt-3 rounded-xl bg-white p-5">No proposed actions recorded yet.</section>@endforelse
 @if($ccr->status === 'draft')
